@@ -255,3 +255,7 @@
 /NVIDIA_CUDA-5.0_Samples/0_Simple/asyncAPI/*.pdb
 /NVIDIA_CUDA-5.0_Samples/0_Simple/asyncAPI/*.o
 /NVIDIA_CUDA-5.0_Samples/0_Simple/inlinePTX/*.o
+/NVIDIA_CUDA-5.0_Samples/3_Imaging/bilateralFilter/Win32
+/NVIDIA_CUDA-5.0_Samples/0_Simple/cdpSimplePrint/Win32
+/NVIDIA_CUDA-5.0_Samples/bin/win32/Debug/*.ilk
+/NVIDIA_CUDA-5.0_Samples/bin/win32/Debug/*.pdb
