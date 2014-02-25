@@ -1,17 +1,10 @@
-This sample illustrates the usage of CUDA streams for overlapping
-kernel execution with device/host memcopies.  The kernel is used to 
-initialize an array to a specific value, after which the array is 
-copied to the host (CPU) memory.  To increase performance, multiple 
-kernel/memcopy pairs are launched asynchronously, each pair in its 
-own stream.  Devices with Compute Capability 1.1 can overlap a kernel
-and a memcopy as long as they are issued in different streams.  Kernels
-are serialized.  Thus, if n pairs are launched, streamed approach
-can reduce the memcopy cost to the (1/n)th of a single copy of the entire
-data set.
- 
-Additionally, this sample uses CUDA events to measure elapsed time for
-CUDA calls.  Events are a part of CUDA API and provide a system independent
-way to measure execution times on CUDA devices with approximately 0.5 
-microsecond precision.
+Sample: Simple Multi Copy and Compute
+Minimum spec: GeForce 8
 
-Elapsed times are averaged over nreps repetitions (10 by default).
+Supported in GPUs with Compute Capability 1.1, overlaping compute with one memcopy is possible from the host system.  For Quadro and Tesla GPUs with Compute Capability 2.0, a second overlapped copy operation in either direction at full speed is possible (PCI-e is symmetric).  This sample illustrates the usage of CUDA streams to achieve overlapping of kernel execution with data copies to and 
+
+Key concepts:
+CUDA Streams and Events
+Asynchronous Data Transfers
+Overlap Compute and Copy
+GPU Performance

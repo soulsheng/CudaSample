@@ -1,6 +1,9 @@
 Sample: Simple Texture
-Minimum spec: SM 1.0
+Minimum spec: GeForce 8
 
 Simple example that demonstrates use of Textures in CUDA.
 
 Key concepts:
+CUDA Runtime API
+Texture
+Image Processing
