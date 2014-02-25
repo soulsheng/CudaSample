@@ -686,22 +686,22 @@ static const char *_cudaGetErrorEnum(NppStatus error)
         case NPP_MEMSET_ERR:
             return "NPP_MEMSET_ERR";
 
-        case NPP_MEMCPY_ERR:
+        case NPP_MEMCPY_ERROR:
             return "NPP_MEMCPY_ERROR";
 
         case NPP_MIRROR_FLIP_ERR:
             return "NPP_MIRROR_FLIP_ERR";
 #else
-        case NPP_MEMFREE_ERROR:
+        case NPP_MEMFREE_ERR:
             return "NPP_MEMFREE_ERROR";
 
-        case NPP_MEMSET_ERROR:
+        case NPP_MEMSET_ERR:
             return "NPP_MEMSET_ERROR";
 
         case NPP_MEMCPY_ERROR:
             return "NPP_MEMCPY_ERROR";
 
-        case NPP_MIRROR_FLIP_ERROR:
+        case NPP_MIRROR_FLIP_ERR:
             return "NPP_MIRROR_FLIP_ERROR";
 #endif
 

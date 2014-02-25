@@ -1,5 +1,5 @@
 /*
- * Copyright 1993-2013 NVIDIA Corporation.  All rights reserved.
+ * Copyright 1993-2012 NVIDIA Corporation.  All rights reserved.
  *
  * Please refer to the NVIDIA end user license agreement (EULA) associated
  * with this source code for terms and conditions that govern your use of
@@ -24,54 +24,50 @@
  */
 
 char myPtx64[] = "\n\
-.version 3.2\n\
-.target sm_20\n\
-.address_size 64\n\
-.visible .entry _Z8myKernelPi(\n\
-	.param .u64 _Z8myKernelPi_param_0\n\
-)\n\
-{\n\
-	.reg .s32 	%r<5>;\n\
-	.reg .s64 	%rd<5>;\n\
-	ld.param.u64 	%rd1, [_Z8myKernelPi_param_0];\n\
-	cvta.to.global.u64 	%rd2, %rd1;\n\
-	.loc 1 3 1\n\
-	mov.u32 	%r1, %ntid.x;\n\
-	mov.u32 	%r2, %ctaid.x;\n\
-	mov.u32 	%r3, %tid.x;\n\
-	mad.lo.s32 	%r4, %r1, %r2, %r3;\n\
-	mul.wide.s32 	%rd3, %r4, 4;\n\
-	add.s64 	%rd4, %rd2, %rd3;\n\
-	.loc 1 4 1\n\
-	st.global.u32 	[%rd4], %r4;\n\
-	.loc 1 5 2\n\
-	ret;\n\
-}\n\
+        .version 1.4\n\
+        .target sm_10, map_f64_to_f32\n\
+        .entry _Z8myKernelPi (\n\
+                .param .u64 __cudaparm__Z8myKernelPi_data)\n\
+        {\n\
+        .reg .u16 %rh<4>;\n\
+        .reg .u32 %r<5>;\n\
+        .reg .u64 %rd<6>;\n\
+        cvt.u32.u16     %r1, %tid.x;\n\
+        mov.u16         %rh1, %ctaid.x;\n\
+        mov.u16         %rh2, %ntid.x;\n\
+        mul.wide.u16    %r2, %rh1, %rh2;\n\
+        add.u32         %r3, %r1, %r2;\n\
+        ld.param.u64    %rd1, [__cudaparm__Z8myKernelPi_data];\n\
+        cvt.s64.s32     %rd2, %r3;\n\
+        mul.wide.s32    %rd3, %r3, 4;\n\
+        add.u64         %rd4, %rd1, %rd3;\n\
+        st.global.s32   [%rd4+0], %r3;\n\
+        exit;\n\
+        }\n\
 ";
 
 char myPtx32[] = "\n\
-.version 3.2\n\
-.target sm_20\n\
-.address_size 32\n\
-.visible .entry _Z8myKernelPi(\n\
-	.param .u32 _Z8myKernelPi_param_0\n\
-)\n\
-{\n\
-	.reg .s32 	%r<9>;\n\
-	ld.param.u32 	%r1, [_Z8myKernelPi_param_0];\n\
-	cvta.to.global.u32 	%r2, %r1;\n\
-	.loc 1 3 1\n\
-	mov.u32 	%r3, %ntid.x;\n\
-	mov.u32 	%r4, %ctaid.x;\n\
-	mov.u32 	%r5, %tid.x;\n\
-	mad.lo.s32 	%r6, %r3, %r4, %r5;\n\
-	.loc 1 4 1\n\
-	shl.b32 	%r7, %r6, 2;\n\
-	add.s32 	%r8, %r2, %r7;\n\
-	st.global.u32 	[%r8], %r6;\n\
-	.loc 1 5 2\n\
-	ret;\n\
-}\n\
+	.version 1.4\n\
+	.target sm_10, map_f64_to_f32\n\
+	.entry _Z8myKernelPi (\n\
+		.param .u32 __cudaparm__Z8myKernelPi_data)\n\
+	{\n\
+        .reg .u16 %rh<4>;\n\
+        .reg .u32 %r<8>;\n\
+        .loc    28      14      0\n\
+        .loc    28      17      0\n\
+        mov.u16         %rh1, %ctaid.x;\n\
+        mov.u16         %rh2, %ntid.x;\n\
+        mul.wide.u16    %r1, %rh1, %rh2;\n\
+        cvt.u32.u16     %r2, %tid.x;\n\
+        add.u32         %r3, %r2, %r1;\n\
+        ld.param.u32    %r4, [__cudaparm__Z8myKernelPi_data];\n\
+        mul.lo.u32      %r5, %r3, 4;\n\
+        add.u32         %r6, %r4, %r5;\n\
+        st.global.s32   [%r6+0], %r3;\n\
+        .loc    28      18      0\n\
+        exit;\n\
+        }\n\
 ";
 
 #endif
