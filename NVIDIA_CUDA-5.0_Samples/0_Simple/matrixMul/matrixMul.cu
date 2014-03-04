@@ -44,6 +44,21 @@
 #define WC WB  // Matrix C width 
 #define HC HA  // Matrix C height
 
+// Matrix multiplication kernel called by MatMul()
+__global__ void matrixMulCUDABasic(float *C, float *A, float *B, int wA, int wB) 
+{
+	// Each thread computes one element of C
+	// by accumulating results into Cvalue
+	float Cvalue = 0;
+	int row = blockIdx.y * blockDim.y + threadIdx.y;
+	int col = blockIdx.x * blockDim.x + threadIdx.x;
+
+	for (int e = 0; e < wA; ++e)
+		Cvalue += A[row * wA + e] * B[e * wB + col];
+
+	C[row * wB + col] = Cvalue;
+}
+
 /**
  * Matrix multiplication (CUDA Kernel) on the device: C = A * B
  * wA is A's width and wB is B's width
