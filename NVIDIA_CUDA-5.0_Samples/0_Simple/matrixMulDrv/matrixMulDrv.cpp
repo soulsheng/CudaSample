@@ -258,13 +258,14 @@ runTest(int argc, char **argv)
                                        NULL, NULL, (void **)&kernel_launch_config));
     }
 
-    // copy result from device to host
-    checkCudaErrors(cuMemcpyDtoH((void *) h_C, d_C, mem_size_C));
-
-    // stop and destroy timer
+	// stop and destroy timer
+	cuCtxSynchronize();
     sdkStopTimer(&timer);
     printf("Processing time: %f (ms)\n", sdkGetTimerValue(&timer));
     sdkDeleteTimer(&timer);
+
+	// copy result from device to host
+	checkCudaErrors(cuMemcpyDtoH((void *) h_C, d_C, mem_size_C));
 
     printf("Checking computed result for correctness: ");
     bool correct = true;
@@ -273,7 +274,7 @@ runTest(int argc, char **argv)
     {
         if (fabs(h_C[i] - (WA * valB)) > 1e-5)
         {
-            printf("Error! Matrix[%05d]=%.8f, ref=%.8f error term is > 1e-5\n", i, h_C[i], WA*valB);
+            //printf("Error! Matrix[%05d]=%.8f, ref=%.8f error term is > 1e-5\n", i, h_C[i], WA*valB);
             correct = false;
         }
     }

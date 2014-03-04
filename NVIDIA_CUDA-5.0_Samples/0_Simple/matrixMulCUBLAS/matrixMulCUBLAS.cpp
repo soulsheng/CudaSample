@@ -71,6 +71,15 @@ typedef struct _matrixSize      // Optional Command-line multiplier for matrix s
     unsigned int uiWA, uiHA, uiWB, uiHB, uiWC, uiHC;
 } sMatrixSize;
 
+// Matrix dimensions
+// (chosen as multiples of the thread block size for simplicity)
+#define WA (32 * block_size) // Matrix A width
+#define HA (32 * block_size) // Matrix A height
+#define WB (32 * block_size) // Matrix B width
+#define HB WA  // Matrix B height
+#define WC WB  // Matrix C width 
+#define HC HA  // Matrix C height
+
 ////////////////////////////////////////////////////////////////////////////////
 //! Compute reference data set matrix multiply on CPU
 //! C = A * B
@@ -203,12 +212,12 @@ void initializeCUDA(int argc, char **argv, int &devID, int &iSizeMultiple, sMatr
     // use a larger block size for Fermi and above
     int block_size = (deviceProp.major < 2) ? 16 : 32;
 
-    matrix_size.uiWA = 2 * block_size * iSizeMultiple;
-    matrix_size.uiHA = 4 * block_size * iSizeMultiple;
-    matrix_size.uiWB = 2 * block_size * iSizeMultiple;
-    matrix_size.uiHB = 4 * block_size * iSizeMultiple;
-    matrix_size.uiWC = 2 * block_size * iSizeMultiple;
-    matrix_size.uiHC = 4 * block_size * iSizeMultiple;
+    matrix_size.uiWA = WA;
+    matrix_size.uiHA = HA;
+    matrix_size.uiWB = WB;
+    matrix_size.uiHB = HB;
+    matrix_size.uiWC = WC;
+    matrix_size.uiHC = HC;
 
     printf("MatrixA(%u,%u), MatrixB(%u,%u), MatrixC(%u,%u)\n",
            matrix_size.uiWA, matrix_size.uiHA,

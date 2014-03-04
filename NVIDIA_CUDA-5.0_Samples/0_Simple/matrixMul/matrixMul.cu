@@ -35,6 +35,15 @@
 // Helper functions and utilities to work with CUDA
 #include <helper_functions.h>
 
+// Matrix dimensions
+// (chosen as multiples of the thread block size for simplicity)
+#define WA (32 * block_size) // Matrix A width
+#define HA (32 * block_size) // Matrix A height
+#define WB (32 * block_size) // Matrix B width
+#define HB WA  // Matrix B height
+#define WC WB  // Matrix C width 
+#define HC HA  // Matrix C height
+
 /**
  * Matrix multiplication (CUDA Kernel) on the device: C = A * B
  * wA is A's width and wB is B's width
@@ -409,8 +418,8 @@ int main(int argc, char **argv)
     // Use a larger block size for Fermi and above
     int block_size = (deviceProp.major < 2) ? 16 : 32;
 
-    dim3 dimsA(5*2*block_size, 5*2*block_size, 1);
-    dim3 dimsB(5*4*block_size, 5*2*block_size, 1);
+    dim3 dimsA(WA, HA, 1);
+    dim3 dimsB(WB, HB, 1);
 
     // width of Matrix A
     if (checkCmdLineFlag(argc, (const char **)argv, "wA"))
