@@ -352,3 +352,5 @@
 /NVIDIA_CUDA-5.0_Samples/bin/win32/Release/*.pdb
 /NVIDIA_CUDA-5.0_Samples/ipch
 /NVIDIA_CUDA-5.0_Samples/3_Imaging/bilateralFilter/*.o
+/NVIDIA_CUDA-5.0_Samples/0_Simple/matrixMul/*.sdf
+/NVIDIA_CUDA-5.0_Samples/0_Simple/matrixMul/*.suo
