@@ -287,6 +287,20 @@ int matrixMultiply(int argc, char **argv, int devID, sMatrixSize &matrix_size)
         exit(EXIT_FAILURE);
     }
 
+	error = cudaMalloc((void **) &d_C, mem_size_C);
+
+	if (error != cudaSuccess)
+	{
+		printf("cudaMalloc d_C returned error code %d, line(%d)\n", error, __LINE__);
+		exit(EXIT_FAILURE);
+	}
+
+	// create and start timer
+	StopWatchInterface *timerMemIn = NULL;
+	sdkCreateTimer(&timerMemIn);
+	// start the timer
+	sdkStartTimer(&timerMemIn);
+
     // copy host memory to device
     error = cudaMemcpy(d_A, h_A, mem_size_A, cudaMemcpyHostToDevice);
 
@@ -304,13 +318,9 @@ int matrixMultiply(int argc, char **argv, int devID, sMatrixSize &matrix_size)
         exit(EXIT_FAILURE);
     }
 
-    error = cudaMalloc((void **) &d_C, mem_size_C);
-
-    if (error != cudaSuccess)
-    {
-        printf("cudaMalloc d_C returned error code %d, line(%d)\n", error, __LINE__);
-        exit(EXIT_FAILURE);
-    }
+	sdkStopTimer(&timerMemIn);
+	printf("\nMemory H2D Transferring time: %f (ms)\n", sdkGetTimerValue(&timerMemIn));
+	sdkDeleteTimer(&timerMemIn);
 
     // setup execution parameters
     dim3 threads(block_size, block_size);
@@ -427,8 +437,18 @@ int matrixMultiply(int argc, char **argv, int devID, sMatrixSize &matrix_size)
             msecPerMatrixMul,
             flopsPerMatrixMul);
 
+		// create and start timer
+		StopWatchInterface *timerMemOut = NULL;
+		sdkCreateTimer(&timerMemOut);
+		// start the timer
+		sdkStartTimer(&timerMemOut);
+
         // copy result from device to host
         error = cudaMemcpy(h_CUBLAS, d_C, mem_size_C, cudaMemcpyDeviceToHost);
+
+		sdkStopTimer(&timerMemOut);
+		printf("\Memory D2H Transferring time: %f (ms)\n", sdkGetTimerValue(&timerMemOut));
+		sdkDeleteTimer(&timerMemOut);
 
         if (error != cudaSuccess)
         {
@@ -442,7 +462,19 @@ int matrixMultiply(int argc, char **argv, int devID, sMatrixSize &matrix_size)
     // compute reference solution
     printf("Computing result using host CPU...");
     float *reference = (float *)malloc(mem_size_C);
+
+	// create and start timer
+	StopWatchInterface *timer = NULL;
+	sdkCreateTimer(&timer);
+	// start the timer
+	sdkStartTimer(&timer);
+
     matrixMulCPU(reference, h_A, h_B, matrix_size.uiHA, matrix_size.uiWA, matrix_size.uiWB);
+
+	sdkStopTimer(&timer);
+	printf("\nCPU Processing time: %f (ms)\n", sdkGetTimerValue(&timer));
+	sdkDeleteTimer(&timer);
+
     printf("done.\n");
 
     // check result (CUBLAS)
