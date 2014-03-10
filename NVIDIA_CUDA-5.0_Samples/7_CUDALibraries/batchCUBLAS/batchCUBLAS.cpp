@@ -123,10 +123,12 @@ void printCuType(const char *str, double A)
 #define CUBLAS_DGEMM_MAX_ULP_ERR    (1.e-3)
 #define CUBLAS_SGEMM_MAX_RELATIVE_ERR    (6.e-6)
 #define CUBLAS_DGEMM_MAX_RELATIVE_ERR    (0.0)
-#define CUBLAS_GEMM_TEST_COUNT     (30)
-#define BENCH_MATRIX_M              (128)
-#define BENCH_MATRIX_K              (128)
-#define BENCH_MATRIX_N              (128)
+#define CUBLAS_GEMM_TEST_COUNT     (10) // 10~1000
+
+#define BENCH_MATRIX_EXP			7 //2~10
+#define BENCH_MATRIX_M              (1<<BENCH_MATRIX_EXP)
+#define BENCH_MATRIX_K              (1<<BENCH_MATRIX_EXP)
+#define BENCH_MATRIX_N              (1<<BENCH_MATRIX_EXP)
 
 #define CLEANUP()                           \
     do {                                        \
@@ -236,7 +238,7 @@ static int processArgs(int argc, char *argv[], struct gemmOpts *opts)
     memset(opts, 0, sizeof(*opts));
     static char default_type[] = "d"; //default double
     opts->elem_type = default_type;
-    opts->N = 10;
+    opts->N = CUBLAS_GEMM_TEST_COUNT;
 
     while (argc)
     {
