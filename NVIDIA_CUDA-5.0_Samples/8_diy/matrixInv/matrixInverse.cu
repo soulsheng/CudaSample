@@ -155,6 +155,80 @@ static int processArgs(int argc, char *argv[], struct Options *opts)
     return error;
 }
 
+int verifyResult( T_ELEM *A, T_ELEM *B , int n ) 
+{
+    T_ELEM *C  = (T_ELEM *)malloc( n * n * sizeof(T_ELEM));
+
+	/* Host implementation of a simple version of sgemm */
+    int i;
+    int j;
+    int k;
+
+    for (i = 0; i < n; ++i)
+    {
+        for (j = 0; j < n; ++j)
+        {
+            T_ELEM prod = 0;
+
+            for (k = 0; k < n; ++k)
+            {
+                prod += A[k * n + i] * B[j * n + k];
+            }
+
+            C[j * n + i] = prod;
+        }
+    }
+
+	for (i = 0; i < n; ++i)
+    {
+		if( fabs( C[i * n + i] - 1.0f ) > 1.0e-3 )
+		{
+			free(C);
+			return i;
+		}
+	}
+
+	free(C);
+	return 0;
+}
+
+int verifyResultBLAS( T_ELEM *A, T_ELEM *B , int n ) 
+{
+    cublasStatus_t status;
+	
+	// blas config
+    cublasHandle_t handle;
+	cublasCreate(&handle);
+
+	float alpha = 1.0f;
+	float beta = 0.0f;
+
+	T_ELEM *d_C;
+	cudaMalloc((void **)&d_C, n * n * sizeof(T_ELEM));
+    T_ELEM *C  = (T_ELEM *)malloc( n * n * sizeof(T_ELEM));
+
+    status = cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, n, n, n, &alpha, A, n, B, n, &beta, d_C, n);
+
+	cudaMemcpy( C, d_C, n * n * sizeof(T_ELEM) , cudaMemcpyDeviceToHost );
+
+
+	cudaFree( d_C );
+	cublasDestroy(handle);
+
+	for (int i = 0; i < n; ++i)
+    {
+		if( fabs( C[i * n + i] - 1.0f ) > 1.0e-3 )
+		{
+			free(C);
+			return i;
+		}
+	}
+
+	free(C);
+	return 0;
+
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //! Run a simple test for CUDA
 ////////////////////////////////////////////////////////////////////////////////
@@ -185,6 +259,7 @@ runTest(int argc, char **argv)
     T_ELEM **devPtrA = 0;
     T_ELEM **devPtrA_dev = NULL;
 
+	T_ELEM *C = NULL;
 	T_ELEM **devPtrC = 0;
     T_ELEM **devPtrC_dev = NULL;
 
@@ -217,6 +292,8 @@ runTest(int argc, char **argv)
 
     err1 = cudaMalloc((void **)&devPtrC_dev, sizeBatch * sizeof(T_ELEM));
     err1 = cudaMemcpy(devPtrC_dev, devPtrC, sizeBatch * sizeof(*devPtrC), cudaMemcpyHostToDevice);
+
+    C  = (T_ELEM *)malloc(matrixSize * sizeof(T_ELEM));
 
 	// temp data
 	int *d_pivotArray = NULL;
@@ -326,10 +403,25 @@ runTest(int argc, char **argv)
     printf("Processing time: %f (ms)\n", sdkGetTimerValue(&timer));
     sdkDeleteTimer(&timer);
 
-
+	int bStatus = 0;
+	for(int i=0; i< sizeBatch; i++)
+	{
+#if 0
+		bStatus = verifyResultBLAS( devPtrA[i], devPtrC[i], matrixRows );
+#else
+		cudaMemcpy( C, devPtrC[i], matrixSize * sizeof(T_ELEM) , cudaMemcpyDeviceToHost );
+		bStatus = verifyResult( A, C, matrixRows );	
+#endif
+		if( bStatus )
+		{
+			printf( "Matrix Inverse Wrong! A*A^(-1) [%d,%d] !=1 \n" ,bStatus ,bStatus );
+			break;
+		}
+	}
 
     // cleanup memory
 	if (A) free (A); 
+    if (C) free (C);
 
 	for(int i = 0; i < sizeBatch; ++i) {       
             if(devPtrA[i]) cudaFree(devPtrA[i]);
@@ -346,6 +438,8 @@ runTest(int argc, char **argv)
 
 	if (d_pivotArray) cudaFree(d_pivotArray);
 	if (d_infoArray) cudaFree(d_infoArray); 
+
+	cublasDestroy(handle);
 
     cudaDeviceReset();
     exit(bTestResult ? EXIT_SUCCESS : EXIT_FAILURE);
