@@ -255,7 +255,7 @@ runTest(int argc, char **argv)
     printf("matrixRows = %d , sizeBatch = %d...\n\n", matrixRows, sizeBatch );
 
 	// data
-	T_ELEM *A = NULL;
+	T_ELEM **A = NULL;
     T_ELEM **devPtrA = 0;
     T_ELEM **devPtrA_dev = NULL;
 
@@ -273,14 +273,18 @@ runTest(int argc, char **argv)
     err1 = cudaMalloc((void **)&devPtrA_dev, sizeBatch * sizeof(T_ELEM));
     err1 = cudaMemcpy(devPtrA_dev, devPtrA, sizeBatch * sizeof(*devPtrA), cudaMemcpyHostToDevice);
 
-    A  = (T_ELEM *)malloc(matrixSize * sizeof(T_ELEM));
+    A  = (T_ELEM **)malloc(sizeBatch * sizeof(T_ELEM*));
+	for (int i = 0; i < sizeBatch ; i++)
+    {
+		A[i]  = (T_ELEM *)malloc(matrixSize * sizeof(T_ELEM));
+		memset(A[i], 0xFF, matrixSize * sizeof(A[0]));
+		fillupMatrixDebug( A[i], matrixRows );
+	}
 
-	memset(A, 0xFF, matrixSize * sizeof(A[0]));
-	fillupMatrixDebug( A, matrixRows );
 
 	for (int i = 0; i < sizeBatch ; i++)
     {
-		cublasSetMatrix( matrixRows, matrixRows, sizeof(A[0]), A, matrixRows, devPtrA[i], matrixRows);
+		cublasSetMatrix( matrixRows, matrixRows, sizeof(A[0]), A[i], matrixRows, devPtrA[i], matrixRows);
 	}
 
 	// matrix C, output inverse matrix of A
@@ -410,7 +414,7 @@ runTest(int argc, char **argv)
 		bStatus = verifyResultBLAS( devPtrA[i], devPtrC[i], matrixRows );
 #else
 		cudaMemcpy( C, devPtrC[i], matrixSize * sizeof(T_ELEM) , cudaMemcpyDeviceToHost );
-		bStatus = verifyResult( A, C, matrixRows );	
+		bStatus = verifyResult( A[i], C, matrixRows );	
 #endif
 		if( bStatus )
 		{
@@ -420,13 +424,15 @@ runTest(int argc, char **argv)
 	}
 
     // cleanup memory
-	if (A) free (A); 
     if (C) free (C);
 
 	for(int i = 0; i < sizeBatch; ++i) {       
             if(devPtrA[i]) cudaFree(devPtrA[i]);
             if(devPtrC[i]) cudaFree(devPtrC[i]);
+			if (A[i]) free (A[i]); 
         }  
+
+    if (A) free (A);
 
 	if (devPtrA) free(devPtrA);           
 	if (devPtrC) free(devPtrC); 
