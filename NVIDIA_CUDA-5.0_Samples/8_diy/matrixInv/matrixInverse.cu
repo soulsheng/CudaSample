@@ -230,154 +230,106 @@ int verifyResultBLAS( T_ELEM *A, T_ELEM *B , int n )
 }
 
 // 批量矩阵求逆，调用blas库， C[i] = A[i] ^ -1
-int inverseMatrixBLAS( T_ELEM **A , T_ELEM **C )
+// inverse batch of matrices
+int inverseMatrixBLAS( T_ELEM **A , T_ELEM **C , int matrixRows , int sizeBatch ,int bDebug = false )
 {
-
-	return 0;
-}
-
-// 单个矩阵求逆，调用blas库， C = A ^ -1
-int inverseMatrixBLAS( T_ELEM *A , T_ELEM *C)
-{
-
-	return 0;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//! Run a simple test for CUDA
-////////////////////////////////////////////////////////////////////////////////
-void
-runTest(int argc, char **argv)
-{
-    bool bTestResult = true;
+	int  matrixSize = matrixRows * matrixRows;
 	cudaError_t err1;
 
-    printf("%s Starting...\n\n", argv[0]);
-
-    // use command-line specified CUDA device, otherwise use device with highest Gflops/s
-    int devID = findCudaDevice(argc, (const char **)argv);
-
-	cudaStream_t streamNo = 0;
-
-	// size
-	Options opts;
-	processArgs(argc, argv, &opts);
-	int matrixRows = opts.sizeRow;
-    int matrixSize = matrixRows * matrixRows;
-	int sizeBatch = opts.sizeBatch;
-
-    printf("matrixRows = %d , sizeBatch = %d...\n\n", matrixRows, sizeBatch );
-
-	// data
-	T_ELEM **A = NULL;
+	// temp data
     T_ELEM **devPtrA = 0;
     T_ELEM **devPtrA_dev = NULL;
 
-	T_ELEM **C = NULL;
 	T_ELEM **devPtrC = 0;
     T_ELEM **devPtrC_dev = NULL;
 
-	// matrix A, input matrix
+	// temp data for matrix A, input matrix
     devPtrA =(T_ELEM **)malloc( sizeBatch * sizeof(T_ELEM));
 	for (int i = 0; i < sizeBatch ; i++)
     {
-        err1 = cudaMalloc((void **)&devPtrA[i], matrixSize * sizeof(T_ELEM));
+        cudaMalloc((void **)&devPtrA[i], matrixSize * sizeof(T_ELEM));
+		cublasSetMatrix( matrixRows, matrixRows, sizeof(T_ELEM), A[i], matrixRows, devPtrA[i], matrixRows);
 	}
-
-    err1 = cudaMalloc((void **)&devPtrA_dev, sizeBatch * sizeof(T_ELEM));
-    err1 = cudaMemcpy(devPtrA_dev, devPtrA, sizeBatch * sizeof(*devPtrA), cudaMemcpyHostToDevice);
-
-    A  = (T_ELEM **)malloc(sizeBatch * sizeof(T_ELEM*));
-	for (int i = 0; i < sizeBatch ; i++)
-    {
-		A[i]  = (T_ELEM *)malloc(matrixSize * sizeof(T_ELEM));
-		memset(A[i], 0xFF, matrixSize * sizeof(A[0]));
-		fillupMatrixDebug( A[i], matrixRows );
-	}
+	
+    cudaMalloc((void **)&devPtrA_dev, sizeBatch * sizeof(T_ELEM));
+    cudaMemcpy(devPtrA_dev, devPtrA, sizeBatch * sizeof(*devPtrA), cudaMemcpyHostToDevice);
 
 
-	for (int i = 0; i < sizeBatch ; i++)
-    {
-		cublasSetMatrix( matrixRows, matrixRows, sizeof(A[0]), A[i], matrixRows, devPtrA[i], matrixRows);
-	}
-
-	// matrix C, output inverse matrix of A
+	// temp data for matrix C, output inverse matrix of A
 	devPtrC =(T_ELEM **)malloc( sizeBatch * sizeof(T_ELEM));
 	for (int i = 0; i < sizeBatch ; i++)
     {
-        err1 = cudaMalloc((void **)&devPtrC[i], matrixSize * sizeof(T_ELEM));
+        cudaMalloc((void **)&devPtrC[i], matrixSize * sizeof(T_ELEM));
 	}
 
-    err1 = cudaMalloc((void **)&devPtrC_dev, sizeBatch * sizeof(T_ELEM));
-    err1 = cudaMemcpy(devPtrC_dev, devPtrC, sizeBatch * sizeof(*devPtrC), cudaMemcpyHostToDevice);
+    cudaMalloc((void **)&devPtrC_dev, sizeBatch * sizeof(T_ELEM));
+    cudaMemcpy(devPtrC_dev, devPtrC, sizeBatch * sizeof(*devPtrC), cudaMemcpyHostToDevice);
 
-	C  = (T_ELEM **)malloc(sizeBatch * sizeof(T_ELEM*));
-	for (int i = 0; i < sizeBatch ; i++)
-    {
-		C[i]  = (T_ELEM *)malloc(matrixSize * sizeof(T_ELEM));
-	}
 
-	// temp data
+	// temp data middle
 	int *d_pivotArray = NULL;
 	int *d_infoArray = NULL;
 	cudaMalloc( (void**)&d_pivotArray, matrixRows*sizeBatch*sizeof(int) );
 	cudaMalloc( (void**)&d_infoArray,  sizeBatch*sizeof(int) );
-
+	
 	int *h_infoArray = NULL;
-	h_infoArray = (int*)malloc( sizeBatch*sizeof(int) );
 
 	// blas config
     cublasHandle_t handle;
 	cublasCreate(&handle);
+    cublasSetStream(handle, 0 );
 
-	// timer
+	// timer begin
     StopWatchInterface *timer = 0;
     sdkCreateTimer(&timer);
     sdkStartTimer(&timer);
 
-    cublasSetStream(handle, streamNo );
-	
-	cublasStatus_t status ;
-
-	// LU factorization
-	status = cublasSgetrfBatched(handle, 
+	// LU factorization ， 矩阵LU三角分解
+	cublasStatus_t status = cublasSgetrfBatched(handle, 
 		matrixRows, 
 		devPtrA_dev, 
 		matrixRows,
 		d_pivotArray,
 		d_infoArray,
 		sizeBatch);
-#if 0
-	cudaMemcpy( h_infoArray,  d_infoArray, sizeBatch*sizeof(int), cudaMemcpyDeviceToHost );
 
-	for(int i=0;i<sizeBatch;i++)
-	{
-		if( h_infoArray[i] == 0 )
-		{
-			//fprintf(stderr, "%d-th matrix lu-decompose successed, !\n", i );
-			continue;
-		}
-		else if (h_infoArray[i] > 0)
-		{
-			fprintf(stderr, "%d-th matrix lu-decompose failed, U(%d,%d) = 0!\n", i, h_infoArray[i], h_infoArray[i] );
-			continue;
-		}
-		else
-		{
-			fprintf(stderr, "%d-th matrix lu-decompose failed, the %d-th parameter had an illegal value!\n", i, -h_infoArray[i] );
-			continue;
-		}
-	}
-#endif
-
+	
 	if (status != CUBLAS_STATUS_SUCCESS)
     {
           cudaError_t cuError = cudaGetLastError();
           fprintf(stderr, "!!!! GPU program execution error : cublas Error=%d, cuda Error=%d,(%s)\n", status, cuError,cudaGetErrorString(cuError));
-          return ;
+          return -1;
     }
 
-	// inversion of matrices A, output result to matrices C
+	// 检测LU分解是否顺利执行
+	if( bDebug )
+	{
+		h_infoArray = (int*)malloc( sizeBatch*sizeof(int) );
+
+		cudaMemcpy( h_infoArray,  d_infoArray, sizeBatch*sizeof(int), cudaMemcpyDeviceToHost );
+
+		for(int i=0;i<sizeBatch;i++)
+		{
+			if( h_infoArray[i] == 0 )
+			{
+				//fprintf(stderr, "%d-th matrix lu-decompose successed, !\n", i );
+				continue;
+			}
+			else if (h_infoArray[i] > 0)
+			{
+				fprintf(stderr, "%d-th matrix lu-decompose failed, U(%d,%d) = 0!\n", i, h_infoArray[i], h_infoArray[i] );
+				continue;
+			}
+			else
+			{
+				fprintf(stderr, "%d-th matrix lu-decompose failed, the %d-th parameter had an illegal value!\n", i, -h_infoArray[i] );
+				continue;
+			}
+		}
+	}
+
+
+	// inversion of matrices A, output result to matrices C ， 三角矩阵求逆
 	status = cublasSgetriBatched(handle, 
 		matrixRows, 
 		devPtrA_dev, 
@@ -392,84 +344,170 @@ runTest(int argc, char **argv)
     {
           cudaError_t cuError = cudaGetLastError();
           fprintf(stderr, "!!!! GPU program execution error : cublas Error=%d, cuda Error=%d,(%s)\n", status, cuError,cudaGetErrorString(cuError));
-          return ;
+          return -1 ;
     }
 
-#if 0
-	cudaMemcpy( h_infoArray,  d_infoArray, sizeBatch*sizeof(int), cudaMemcpyDeviceToHost );
-
-	for(int i=0;i<sizeBatch;i++)
+	// 检测三角矩阵求逆是否顺利执行
+	if( bDebug )
 	{
-		if( h_infoArray[i] == 0 )
+		cudaMemcpy( h_infoArray,  d_infoArray, sizeBatch*sizeof(int), cudaMemcpyDeviceToHost );
+
+		for(int i=0;i<sizeBatch;i++)
 		{
-			//fprintf(stderr, "%d-th matrix lu-decompose successed, !\n", i );
-			continue;
-		}
-		else if (h_infoArray[i] > 0)
-		{
-			fprintf(stderr, "%d-th matrix lu-decompose failed, U(%d,%d) = 0!\n", i, h_infoArray[i], h_infoArray[i] );
-			continue;
+			if( h_infoArray[i] == 0 )
+			{
+				//fprintf(stderr, "%d-th matrix lu-decompose successed, !\n", i );
+				continue;
+			}
+			else if (h_infoArray[i] > 0)
+			{
+				fprintf(stderr, "%d-th matrix lu-decompose failed, U(%d,%d) = 0!\n", i, h_infoArray[i], h_infoArray[i] );
+				continue;
+			}
 		}
 	}
-#endif
 
-	 cudaError_t cudaStatus = cudaThreadSynchronize();
+	// timer end
+	cudaError_t cudaStatus = cudaThreadSynchronize();
 
-        if (cudaStatus != cudaSuccess)
-        {
-            fprintf(stderr, "!!!! GPU program execution error on cudaThreadSynchronize : cudaError=%d,(%s)\n", cudaStatus,cudaGetErrorString(cudaStatus));
-            return ;
-        }
+	if (cudaStatus != cudaSuccess)
+    {
+		fprintf(stderr, "!!!! GPU program execution error on cudaThreadSynchronize : cudaError=%d,(%s)\n", cudaStatus,cudaGetErrorString(cudaStatus));
+		return -1;
+	}
 
     sdkStopTimer(&timer);
     printf("Processing time: %f (ms)\n", sdkGetTimerValue(&timer));
     sdkDeleteTimer(&timer);
 
-	// 逆矩阵结果，gpu -> cpu
+	// 逆矩阵结果从显存返回内存，gpu -> cpu
 	for(int i=0; i< sizeBatch; i++)
 	{
 		cudaMemcpy( C[i], devPtrC[i], matrixSize * sizeof(T_ELEM) , cudaMemcpyDeviceToHost );
 	}
 
-	int bStatus = 0;
-	for(int i=0; i< sizeBatch; i++)
+	// 验证逆矩阵计算结果是否正确
+	if( bDebug )
 	{
-#if 0
-		bStatus = verifyResultBLAS( devPtrA[i], devPtrC[i], matrixRows );
-#else
-		bStatus = verifyResult( A[i], C[i], matrixRows );	
-#endif
-		if( bStatus )
+		int bStatus = 0;
+		for(int i=0; i< sizeBatch; i++)
 		{
-			printf( "Matrix Inverse Wrong! A*A^(-1) [%d,%d] !=1 \n" ,bStatus ,bStatus );
-			break;
+	#if 0
+			bStatus = verifyResultBLAS( devPtrA[i], devPtrC[i], matrixRows );
+	#else
+			bStatus = verifyResult( A[i], C[i], matrixRows );	
+	#endif
+			if( bStatus )
+			{
+				printf( "Matrix Inverse Wrong! A*A^(-1) [%d,%d] !=1 \n" ,bStatus ,bStatus );
+				break;
+			}
 		}
 	}
 
-    // cleanup memory
 
-	for(int i = 0; i < sizeBatch; ++i) {       
+    // 释放辅助计算用到的临时内存
+	for(int i = 0; i < sizeBatch; ++i) 
+	{       
             if(devPtrA[i]) cudaFree(devPtrA[i]);
             if(devPtrC[i]) cudaFree(devPtrC[i]);
-			if (A[i]) free (A[i]); 
-			if (C[i]) free (C[i]);
-        }  
-
-    if (A) free (A);
-    if (C) free (C);
+	}  
 
 	if (devPtrA) free(devPtrA);           
 	if (devPtrC) free(devPtrC); 
 
-	if (h_infoArray) cudaFree(h_infoArray); 
+	if (devPtrA_dev)	cudaFree(devPtrA_dev);
+	if (devPtrC_dev)	cudaFree(devPtrC_dev); 
 
-	if (devPtrA_dev) cudaFree(devPtrA_dev);
-	if (devPtrC_dev) cudaFree(devPtrC_dev); 
-
-	if (d_pivotArray) cudaFree(d_pivotArray);
-	if (d_infoArray) cudaFree(d_infoArray); 
+	if (d_pivotArray)	cudaFree(d_pivotArray);
+	if (d_infoArray)	cudaFree(d_infoArray); 
+	if (h_infoArray)	free(h_infoArray); 
 
 	cublasDestroy(handle);
+
+	return 0;
+}
+
+// 单个矩阵求逆，调用blas库， C = A ^ -1
+// inverse a matrix
+int inverseMatrixBLAS( T_ELEM *A , T_ELEM *C, int matrixRows, int bDebug = false)
+{
+	// 初始化matrix A, input matrix
+	T_ELEM **ABatch  = (T_ELEM **)malloc( 1 * sizeof(T_ELEM*));
+	*ABatch  = A;
+
+	// matrix C, output inverse matrix of A
+	T_ELEM **CBatch  = (T_ELEM **)malloc( 1 * sizeof(T_ELEM*));
+	*CBatch  = C;
+
+	inverseMatrixBLAS( ABatch, CBatch, matrixRows, 1, bDebug ) ;
+
+	if (ABatch) free (ABatch);
+    if (CBatch) free (CBatch);
+
+	return 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//! Run a simple test for CUDA
+////////////////////////////////////////////////////////////////////////////////
+void
+runTest(int argc, char **argv)
+{
+    printf("%s Starting...\n\n", argv[0]);
+
+    // use command-line specified CUDA device, otherwise use device with highest Gflops/s
+    int devID = findCudaDevice(argc, (const char **)argv);
+
+	// size
+	Options opts;
+	processArgs(argc, argv, &opts);
+	int matrixRows = opts.sizeRow;
+    int matrixSize = matrixRows * matrixRows;
+	int sizeBatch = opts.sizeBatch;
+
+    printf("matrixRows = %d , sizeBatch = %d...\n\n", matrixRows, sizeBatch );
+
+	// data
+	T_ELEM **A = NULL;
+	T_ELEM **C = NULL;
+
+	// 初始化matrix A, input matrix
+	A  = (T_ELEM **)malloc(sizeBatch * sizeof(T_ELEM*));
+	for (int i = 0; i < sizeBatch ; i++)
+    {
+		A[i]  = (T_ELEM *)malloc(matrixSize * sizeof(T_ELEM));
+
+		// 矩阵用随机数模拟
+		memset(A[i], 0xFF, matrixSize * sizeof(A[0]));
+		fillupMatrixDebug( A[i], matrixRows );
+	}
+
+	// matrix C, output inverse matrix of A
+	C  = (T_ELEM **)malloc(sizeBatch * sizeof(T_ELEM*));
+	for (int i = 0; i < sizeBatch ; i++)
+    {
+		C[i]  = (T_ELEM *)malloc(matrixSize * sizeof(T_ELEM));
+	}
+
+	// 单个矩阵求逆
+	int bTestResult = inverseMatrixBLAS( A[0], C[0], matrixRows );
+	if( bTestResult==0 )
+		printf("\nSingle Matrix Inverse Successfully!\n\n\n");
+
+	// 批量矩阵求逆， 默认10个
+	bTestResult = inverseMatrixBLAS( A, C, matrixRows, sizeBatch );
+	if( bTestResult==0 )
+		printf("\nBatch of Matrix Inverse Successfully!\n");
+
+    // cleanup memory
+	for(int i = 0; i < sizeBatch; ++i) 
+	{  
+		if (A[i]) free (A[i]); 
+		if (C[i]) free (C[i]);
+    }  
+    if (A) free (A);
+    if (C) free (C);
 
     cudaDeviceReset();
     exit(bTestResult ? EXIT_SUCCESS : EXIT_FAILURE);
