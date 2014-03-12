@@ -229,6 +229,20 @@ int verifyResultBLAS( T_ELEM *A, T_ELEM *B , int n )
 
 }
 
+// 批量矩阵求逆，调用blas库， C[i] = A[i] ^ -1
+int inverseMatrixBLAS( T_ELEM **A , T_ELEM **C )
+{
+
+	return 0;
+}
+
+// 单个矩阵求逆，调用blas库， C = A ^ -1
+int inverseMatrixBLAS( T_ELEM *A , T_ELEM *C)
+{
+
+	return 0;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //! Run a simple test for CUDA
 ////////////////////////////////////////////////////////////////////////////////
@@ -259,7 +273,7 @@ runTest(int argc, char **argv)
     T_ELEM **devPtrA = 0;
     T_ELEM **devPtrA_dev = NULL;
 
-	T_ELEM *C = NULL;
+	T_ELEM **C = NULL;
 	T_ELEM **devPtrC = 0;
     T_ELEM **devPtrC_dev = NULL;
 
@@ -297,7 +311,11 @@ runTest(int argc, char **argv)
     err1 = cudaMalloc((void **)&devPtrC_dev, sizeBatch * sizeof(T_ELEM));
     err1 = cudaMemcpy(devPtrC_dev, devPtrC, sizeBatch * sizeof(*devPtrC), cudaMemcpyHostToDevice);
 
-    C  = (T_ELEM *)malloc(matrixSize * sizeof(T_ELEM));
+	C  = (T_ELEM **)malloc(sizeBatch * sizeof(T_ELEM*));
+	for (int i = 0; i < sizeBatch ; i++)
+    {
+		C[i]  = (T_ELEM *)malloc(matrixSize * sizeof(T_ELEM));
+	}
 
 	// temp data
 	int *d_pivotArray = NULL;
@@ -407,14 +425,19 @@ runTest(int argc, char **argv)
     printf("Processing time: %f (ms)\n", sdkGetTimerValue(&timer));
     sdkDeleteTimer(&timer);
 
+	// 逆矩阵结果，gpu -> cpu
+	for(int i=0; i< sizeBatch; i++)
+	{
+		cudaMemcpy( C[i], devPtrC[i], matrixSize * sizeof(T_ELEM) , cudaMemcpyDeviceToHost );
+	}
+
 	int bStatus = 0;
 	for(int i=0; i< sizeBatch; i++)
 	{
 #if 0
 		bStatus = verifyResultBLAS( devPtrA[i], devPtrC[i], matrixRows );
 #else
-		cudaMemcpy( C, devPtrC[i], matrixSize * sizeof(T_ELEM) , cudaMemcpyDeviceToHost );
-		bStatus = verifyResult( A[i], C, matrixRows );	
+		bStatus = verifyResult( A[i], C[i], matrixRows );	
 #endif
 		if( bStatus )
 		{
@@ -424,15 +447,16 @@ runTest(int argc, char **argv)
 	}
 
     // cleanup memory
-    if (C) free (C);
 
 	for(int i = 0; i < sizeBatch; ++i) {       
             if(devPtrA[i]) cudaFree(devPtrA[i]);
             if(devPtrC[i]) cudaFree(devPtrC[i]);
 			if (A[i]) free (A[i]); 
+			if (C[i]) free (C[i]);
         }  
 
     if (A) free (A);
+    if (C) free (C);
 
 	if (devPtrA) free(devPtrA);           
 	if (devPtrC) free(devPtrC); 
