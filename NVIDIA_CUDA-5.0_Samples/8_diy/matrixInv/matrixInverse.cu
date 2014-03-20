@@ -14,6 +14,8 @@
 8.3. LU分解 cublas<t>getrfBatched(): http://docs.nvidia.com/cuda/cublas/index.html#cublas-lt-t-gt-getrfbatched  in cuda5.0
 8.4. 求逆   cublas<t>getriBatched(): http://docs.nvidia.com/cuda/cublas/index.html#cublas-lt-t-gt-getribatched  in cuda5.5
 
+10.2. 稀疏矩阵LU分解 cusparse<t>csrilu0 : http://docs.nvidia.com/cuda/cusparse/index.html#cusparse-lt-t-gt-csrilu0
+
 */
 
 // includes, system
@@ -328,7 +330,7 @@ int inverseMatrixBLAS( T_ELEM **A , T_ELEM **C , int matrixRows , int sizeBatch 
 		}
 	}
 
-
+#if 1// if 0 单独测上一步LU分解的时间， 1536*1536矩阵时间分布：700-1800ms GPU480
 	// inversion of matrices A, output result to matrices C ， 三角矩阵求逆
 	status = cublasSgetriBatched(handle, 
 		matrixRows, 
@@ -346,7 +348,7 @@ int inverseMatrixBLAS( T_ELEM **A , T_ELEM **C , int matrixRows , int sizeBatch 
           fprintf(stderr, "!!!! GPU program execution error : cublas Error=%d, cuda Error=%d,(%s)\n", status, cuError,cudaGetErrorString(cuError));
           return -1 ;
     }
-
+#endif
 	// 检测三角矩阵求逆是否顺利执行
 	if( bDebug )
 	{
