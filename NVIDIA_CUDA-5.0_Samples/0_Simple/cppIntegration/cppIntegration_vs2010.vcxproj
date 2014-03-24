@@ -91,7 +91,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>./;../../common/inc;$(CudaToolkitIncludeDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./;$(NVCUDASAMPLES_ROOT)\common\inc;$(CudaToolkitIncludeDir)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_MBCS;</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
@@ -109,7 +109,8 @@
     </PostBuildEvent>
     <CudaCompile>
       <CodeGeneration>compute_10,sm_10;compute_20,sm_20;compute_30,sm_30;compute_35,sm_35</CodeGeneration>
-      <Include>./;../../common/inc</Include>
+      <Include>
+      </Include>
       <Runtime>MTd</Runtime>
       <Defines>WIN32</Defines>
     </CudaCompile>
@@ -148,7 +149,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>./;../../common/inc;$(CudaToolkitIncludeDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./;$(NVCUDASAMPLES_ROOT)\common\inc;$(CudaToolkitIncludeDir)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_MBCS;</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
@@ -167,7 +168,8 @@
       </Command>
     </PostBuildEvent>
     <CudaCompile>
-      <Include>./;../../common/inc</Include>
+      <Include>
+      </Include>
       <CodeGeneration>compute_10,sm_10;compute_20,sm_20;compute_30,sm_30;compute_35,sm_35</CodeGeneration>
       <Runtime>MT</Runtime>
       <Defines>WIN32</Defines>

@@ -107,7 +107,8 @@
     </PostBuildEvent>
     <CudaCompile>
       <CodeGeneration>compute_10,sm_10;compute_20,sm_20;compute_30,sm_30;compute_35,sm_35</CodeGeneration>
-      <Include>./;../../common/inc</Include>
+      <Include>
+      </Include>
       <Runtime>MTd</Runtime>
       <Defines>WIN32</Defines>
     </CudaCompile>
@@ -164,6 +165,8 @@
       <CodeGeneration>compute_10,sm_10;compute_20,sm_20;compute_30,sm_30;compute_35,sm_35</CodeGeneration>
       <Runtime>MT</Runtime>
       <Defines>WIN32</Defines>
+      <Include>
+      </Include>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
