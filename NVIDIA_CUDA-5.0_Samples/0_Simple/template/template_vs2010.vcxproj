@@ -219,12 +219,6 @@
       <Defines Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">WIN32</Defines>
       <Defines Condition="'$(Configuration)|$(Platform)'=='Release|x64'">WIN32</Defines>
     </CudaCompile>
-    <CudaCompile Include="template_kernel.cu">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="template_cpu.cpp" />
