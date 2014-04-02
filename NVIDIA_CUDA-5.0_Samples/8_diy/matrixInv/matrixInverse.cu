@@ -29,6 +29,7 @@
 
 // includes CUDA BLAS
 #include <cublas_v2.h>
+#include <cusparse_v2.h>
 
 // includes, project
 #include <helper_cuda.h>
@@ -60,7 +61,8 @@ void fillupMatrixDebug(T_ELEM *A , int size )
     {
         for (int i = 0; i < size; i++)
         {
-            A[i + size*j ] = rand()%(size*size);
+			if( i==j || i==j-1 || i==j+1 )
+				A[i + size*j ] = rand()%(size*size);
         }
     }
 }
@@ -231,12 +233,59 @@ int verifyResultBLAS( T_ELEM *A, T_ELEM *B , int n )
 
 }
 
+// LU 分解，稀疏矩阵
+int luDecomposeSparse( T_ELEM **devPtrA , int n )
+{
+	
+	 /* Get handle to the CUSPARSE context */
+    cusparseHandle_t cusparseHandle = 0;
+    cusparseStatus_t cusparseStatus;
+    cusparseStatus = cusparseCreate(&cusparseHandle);
+	
+	cusparseMatDescr_t descr = 0;
+    cusparseStatus = cusparseCreateMatDescr(&descr);
+    cusparseSetMatType(descr,CUSPARSE_MATRIX_TYPE_GENERAL);
+    cusparseSetMatIndexBase(descr,CUSPARSE_INDEX_BASE_ZERO);
+
+	// get element count of nonzero
+	int nz = 0;
+	int *nnzPerRow = NULL;
+	cudaMalloc( (void**)&nnzPerRow,  n*sizeof(int) );
+	cusparseSnnz( cusparseHandle, CUSPARSE_DIRECTION_ROW, n, 
+             n, descr, 
+             devPtrA[0], 
+             n, nnzPerRow, &nz );
+
+	// sparse matrix
+	int *d_col, *d_row;
+    float *d_val;
+	checkCudaErrors(cudaMalloc((void **)&d_col, nz*sizeof(int)));
+    checkCudaErrors(cudaMalloc((void **)&d_row, (n+1)*sizeof(int)));
+    checkCudaErrors(cudaMalloc((void **)&d_val, nz*sizeof(float)));
+
+	cusparseStatus = cusparseSdense2csr( cusparseHandle, n, 
+             n, descr, 
+             devPtrA[0], n, 
+			 nnzPerRow, 
+             d_val, d_row, d_col) ;
+	
+	if (cusparseStatus != CUBLAS_STATUS_SUCCESS)
+    {
+          cudaError_t cuError = cudaGetLastError();
+          fprintf(stderr, "!!!! GPU program execution error : cublas Error=%d, cuda Error=%d,(%s)\n", cusparseStatus, cuError,cudaGetErrorString(cuError));
+          return -1;
+    }
+
+	return 0;
+}
+
 // 批量矩阵求逆，调用blas库， C[i] = A[i] ^ -1
 // inverse batch of matrices
 int inverseMatrixBLAS( T_ELEM **A , T_ELEM **C , int matrixRows , int sizeBatch ,int bDebug = false )
 {
 	int  matrixSize = matrixRows * matrixRows;
 	cudaError_t err1;
+	cublasStatus_t status;
 
 	// temp data
     T_ELEM **devPtrA = 0;
@@ -286,8 +335,15 @@ int inverseMatrixBLAS( T_ELEM **A , T_ELEM **C , int matrixRows , int sizeBatch 
     sdkCreateTimer(&timer);
     sdkStartTimer(&timer);
 
+#if 0
+	luDecomposeSparse( devPtrA, matrixRows );
+
+	//d_pivotArray[];
+	//d_infoArray[];
+
+#else
 	// LU factorization ， 矩阵LU三角分解
-	cublasStatus_t status = cublasSgetrfBatched(handle, 
+	status = cublasSgetrfBatched(handle, 
 		matrixRows, 
 		devPtrA_dev, 
 		matrixRows,
@@ -302,7 +358,7 @@ int inverseMatrixBLAS( T_ELEM **A , T_ELEM **C , int matrixRows , int sizeBatch 
           fprintf(stderr, "!!!! GPU program execution error : cublas Error=%d, cuda Error=%d,(%s)\n", status, cuError,cudaGetErrorString(cuError));
           return -1;
     }
-
+#endif
 	// 检测LU分解是否顺利执行
 	if( bDebug )
 	{
@@ -481,7 +537,7 @@ runTest(int argc, char **argv)
 		A[i]  = (T_ELEM *)malloc(matrixSize * sizeof(T_ELEM));
 
 		// 矩阵用随机数模拟
-		memset(A[i], 0xFF, matrixSize * sizeof(A[0]));
+		memset(A[i], 0, matrixSize * sizeof(A[0]));
 		fillupMatrixDebug( A[i], matrixRows );
 	}
 
