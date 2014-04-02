@@ -224,7 +224,11 @@
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="matrixInverse.cpp" />
     <ClCompile Include="matrixInverse_cpu.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="matrixInverse.cuh" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
