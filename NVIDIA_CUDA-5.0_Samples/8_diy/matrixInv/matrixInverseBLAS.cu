@@ -35,7 +35,7 @@
 #include <helper_cuda.h>
 #include <helper_functions.h> // helper functions for SDK examples
 
-#include "matrixInverse.cuh"
+#include "matrixInverseBLAS.cuh"
 
 #define BENCH_MATRIX_EXP			7 //2~10
 #define BENCH_MATRIX_ROWS           (1<<BENCH_MATRIX_EXP)
