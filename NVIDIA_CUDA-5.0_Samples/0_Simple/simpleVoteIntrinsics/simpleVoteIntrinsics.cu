@@ -1,5 +1,5 @@
 /*
- * Copyright 1993-2013 NVIDIA Corporation.  All rights reserved.
+ * Copyright 1993-2014 NVIDIA Corporation.  All rights reserved.
  *
  * Please refer to the NVIDIA end user license agreement (EULA) associated
  * with this source code for terms and conditions that govern your use of
@@ -213,6 +213,12 @@ int main(int argc, char **argv)
     if (version < 0x12)
     {
         printf("%s: requires minimum of Compute Capability 1.2 or higher, waiving test...\n", sSDKsample);
+
+        // cudaDeviceReset causes the driver to clean up all state. While
+        // not mandatory in normal operation, it is good practice.  It is also
+        // needed to ensure correct operation when the application is being
+        // profiled. Calling cudaDeviceReset causes all profile data to be
+        // flushed before the application exits
         cudaDeviceReset();
         exit(EXIT_SUCCESS);
     }
@@ -283,6 +289,11 @@ int main(int argc, char **argv)
 
     printf("\tShutting down...\n");
 
+    // cudaDeviceReset causes the driver to clean up all state. While
+    // not mandatory in normal operation, it is good practice.  It is also
+    // needed to ensure correct operation when the application is being
+    // profiled. Calling cudaDeviceReset causes all profile data to be
+    // flushed before the application exits
     cudaDeviceReset();
     return (error_count[0] == 0 && error_count[1] == 0 && error_count[2] == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

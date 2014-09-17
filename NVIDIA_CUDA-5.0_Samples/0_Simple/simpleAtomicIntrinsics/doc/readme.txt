@@ -1,4 +1,4 @@
-CUDA SDK Sample "simpleAtomics"
+CUDA Sample "simpleAtomics"
 
 This code sample is meant to trivially exercise and demonstrate CUDA's global memory atomic functions:
 

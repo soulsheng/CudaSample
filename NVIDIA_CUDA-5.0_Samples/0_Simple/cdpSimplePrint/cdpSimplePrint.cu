@@ -1,5 +1,5 @@
 /**
- * Copyright 1993-2013 NVIDIA Corporation.  All rights reserved.
+ * Copyright 1993-2014 NVIDIA Corporation.  All rights reserved.
  *
  * Please refer to the NVIDIA end user license agreement (EULA) associated
  * with this source code for terms and conditions that govern your use of
@@ -109,29 +109,47 @@ int main(int argc, char **argv)
 
     // Find/set the device.
     int device_count = 0, device = -1;
-    checkCudaErrors(cudaGetDeviceCount(&device_count));
-
-    for (int i = 0 ; i < device_count ; ++i)
+    
+    if(checkCmdLineFlag(argc, (const char **)argv, "device"))
     {
-        cudaDeviceProp properties;
-        checkCudaErrors(cudaGetDeviceProperties(&properties, i));
+        device = getCmdLineArgumentInt(argc, (const char **)argv, "device");
 
+        cudaDeviceProp properties;
+        checkCudaErrors(cudaGetDeviceProperties(&properties, device));
+        
         if (properties.major > 3 || (properties.major == 3 && properties.minor >= 5))
         {
-            device = i;
-            std::cout << "Running on GPU " << i << " (" << properties.name << ")" << std::endl;
-            break;
+            std::cout << "Running on GPU " << device << " (" << properties.name << ")" << std::endl;
+        }
+        else
+        {
+            std::cout << "ERROR: cdpsimplePrint requires GPU devices with compute SM 3.5 or higher."<< std::endl;
+            std::cout << "Current GPU device has compute SM" << properties.major <<"."<< properties.minor <<". Exiting..." << std::endl;
+            exit(EXIT_FAILURE);
         }
 
-        std::cout << "GPU " << i << " (" << properties.name << ") does not support CUDA Dynamic Parallelism" << std::endl;
     }
-
+    else
+    {
+        checkCudaErrors(cudaGetDeviceCount(&device_count));
+        for (int i = 0 ; i < device_count ; ++i)
+        {
+            cudaDeviceProp properties;
+            checkCudaErrors(cudaGetDeviceProperties(&properties, i));
+            if (properties.major > 3 || (properties.major == 3 && properties.minor >= 5))
+            {
+                device = i;
+                std::cout << "Running on GPU " << i << " (" << properties.name << ")" << std::endl;
+                break;
+            }
+            std::cout << "GPU " << i << " (" << properties.name << ") does not support CUDA Dynamic Parallelism" << std::endl;
+        }
+    }
     if (device == -1)
     {
-        std::cerr << "cdpSimplePrint requires GPU devices with compute SM 3.5 or higher.  Exiting..." << std::endl;
-        exit(EXIT_SUCCESS);
-    }
-
+              std::cerr << "cdpSimplePrint requires GPU devices with compute SM 3.5 or higher.  Exiting..." << std::endl;
+              exit(EXIT_SUCCESS);
+     }
     cudaSetDevice(device);
 
     // Print a message describing what the sample does.
@@ -162,6 +180,12 @@ int main(int argc, char **argv)
 
     // Finalize.
     checkCudaErrors(cudaDeviceSynchronize());
+    
+    // cudaDeviceReset causes the driver to clean up all state. While
+    // not mandatory in normal operation, it is good practice.  It is also
+    // needed to ensure correct operation when the application is being
+    // profiled. Calling cudaDeviceReset causes all profile data to be
+    // flushed before the application exits
     checkCudaErrors(cudaDeviceReset());
 
     exit(EXIT_SUCCESS);

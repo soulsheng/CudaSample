@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// Copyright 1993-2013 NVIDIA Corporation.  All rights reserved.
+// Copyright 1993-2014 NVIDIA Corporation.  All rights reserved.
 //
 // Please refer to the NVIDIA end user license agreement (EULA) associated
 // with this source code for terms and conditions that govern your use of
@@ -81,6 +81,12 @@ int main(int argc, char **argv)
         }
     }
 
+    // if GPU found supports SM 1.2, then continue, otherwise we exit 
+    if (!checkCudaCapabilities(1, 2))
+    {
+        exit(EXIT_SUCCESS);
+    }
+
     if (checkCmdLineFlag(argc, (const char **)argv, "use_generic_memory"))
     {
 #if defined(__APPLE__) || defined(MACOSX)
@@ -111,6 +117,12 @@ int main(int argc, char **argv)
     if (!deviceProp.canMapHostMemory)
     {
         fprintf(stderr, "Device %d does not support mapping CPU host memory!\n", idev);
+
+        // cudaDeviceReset causes the driver to clean up all state. While 
+        // not mandatory in normal operation, it is good practice.  It is also 
+        // needed to ensure correct operation when the application is being 
+        // profiled. Calling cudaDeviceReset causes all profile data to be 
+        // flushed before the application exitsits
         cudaDeviceReset();
         exit(EXIT_SUCCESS);
     }
@@ -118,6 +130,12 @@ int main(int argc, char **argv)
     checkCudaErrors(cudaSetDeviceFlags(cudaDeviceMapHost));
 #else
     fprintf(stderr, "CUDART version %d.%d does not support <cudaDeviceProp.canMapHostMemory> field\n", , CUDART_VERSION/1000, (CUDART_VERSION%100)/10);
+
+    // cudaDeviceReset causes the driver to clean up all state. While 
+    // not mandatory in normal operation, it is good practice.  It is also 
+    // needed to ensure correct operation when the application is being 
+    // profiled. Calling cudaDeviceReset causes all profile data to be 
+    // flushed before the application exitsits
     cudaDeviceReset();
     exit(EXIT_SUCCESS);
 #endif
@@ -127,6 +145,12 @@ int main(int argc, char **argv)
     if (bPinGenericMemory)
     {
         fprintf(stderr, "CUDART version %d.%d does not support <cudaHostRegister> function\n", CUDART_VERSION/1000, (CUDART_VERSION%100)/10);
+
+        // cudaDeviceReset causes the driver to clean up all state. While 
+        // not mandatory in normal operation, it is good practice.  It is also 
+        // needed to ensure correct operation when the application is being 
+        // profiled. Calling cudaDeviceReset causes all profile data to be 
+        // flushed before the application exitsits
         cudaDeviceReset();
         exit(EXIT_SUCCESS);
     }
@@ -203,6 +227,7 @@ int main(int argc, char **argv)
         errorNorm += diff*diff;
         refNorm += ref*ref;
     }
+
     errorNorm = (float)sqrt((double)errorNorm);
     refNorm = (float)sqrt((double)refNorm);
 
@@ -230,6 +255,11 @@ int main(int argc, char **argv)
 #endif
     }
 
+    // cudaDeviceReset causes the driver to clean up all state. While 
+    // not mandatory in normal operation, it is good practice.  It is also 
+    // needed to ensure correct operation when the application is being 
+    // profiled. Calling cudaDeviceReset causes all profile data to be 
+    // flushed before the application exitsits
     cudaDeviceReset();
 
     exit(errorNorm/refNorm < 1.e-6f ? EXIT_SUCCESS : EXIT_FAILURE);

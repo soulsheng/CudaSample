@@ -1,5 +1,5 @@
 /*
- * Copyright 1993-2013 NVIDIA Corporation.  All rights reserved.
+ * Copyright 1993-2014 NVIDIA Corporation.  All rights reserved.
  *
  * Please refer to the NVIDIA end user license agreement (EULA) associated
  * with this source code for terms and conditions that govern your use of
@@ -23,7 +23,7 @@
 
 // includes, project
 #include <helper_cuda.h>
-#include <helper_functions.h>  // helper for shared that are common to CUDA SDK samples
+#include <helper_functions.h>  // helper for shared that are common to CUDA Samples
 
 __global__ void SimpleKernel(float *src, float *dst)
 {
@@ -105,6 +105,14 @@ int main(int argc, char **argv)
 #ifdef _WIN32
         printf("\nFor Windows Vista/Win7, a TCC driver must be installed and enabled to use P2P/UVA functionality.\n");
 #endif
+        checkCudaErrors(cudaSetDevice(0));
+
+        // cudaDeviceReset causes the driver to clean up all state. While
+        // not mandatory in normal operation, it is good practice.  It is also
+        // needed to ensure correct operation when the application is being
+        // profiled. Calling cudaDeviceReset causes all profile data to be
+        // flushed before the application exits
+        cudaDeviceReset();
         exit(EXIT_SUCCESS);
     }
 
@@ -129,6 +137,16 @@ int main(int argc, char **argv)
         printf("Two or more SM 2.0 class GPUs are required for %s to run.\n", argv[0]);
         printf("Support for UVA requires a GPU with SM 2.0 capabilities.\n");
         printf("Peer to Peer access is not available between GPU%d <-> GPU%d, waiving test.\n", gpuid[0], gpuid[1]);
+        checkCudaErrors(cudaSetDevice(gpuid[0]));
+
+        // cudaDeviceReset causes the driver to clean up all state. While
+        // not mandatory in normal operation, it is good practice.  It is also
+        // needed to ensure correct operation when the application is being
+        // profiled. Calling cudaDeviceReset causes all profile data to be
+        // flushed before the application exits
+        cudaDeviceReset();
+        checkCudaErrors(cudaSetDevice(gpuid[1]));
+        cudaDeviceReset();
         exit(EXIT_SUCCESS);
     }
 
@@ -254,6 +272,7 @@ int main(int argc, char **argv)
             }
         }
     }
+
     // Disable peer access (also unregisters memory for non-UVA cases)
     printf("Enabling peer access...\n");
     checkCudaErrors(cudaSetDevice(gpuid[0]));
@@ -274,6 +293,12 @@ int main(int argc, char **argv)
     for (int i=0; i<gpu_n; i++)
     {
         checkCudaErrors(cudaSetDevice(i));
+
+        // cudaDeviceReset causes the driver to clean up all state. While
+        // not mandatory in normal operation, it is good practice.  It is also
+        // needed to ensure correct operation when the application is being
+        // profiled. Calling cudaDeviceReset causes all profile data to be
+        // flushed before the application exits
         cudaDeviceReset();
     }
 
@@ -282,8 +307,11 @@ int main(int argc, char **argv)
         printf("Test failed!\n");
         exit(EXIT_FAILURE);
     }
-    printf("Test passed\n");
-    exit(EXIT_SUCCESS);
+    else
+    {
+        printf("Test passed\n");
+        exit(EXIT_SUCCESS);
+    }
 
 #else // Using CUDA 3.2 or older
     printf("simpleP2P requires CUDA 4.0 to build and run, waiving testing\n");

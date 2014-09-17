@@ -1,5 +1,5 @@
 /*
- * Copyright 1993-2013 NVIDIA Corporation.  All rights reserved.
+ * Copyright 1993-2014 NVIDIA Corporation.  All rights reserved.
  *
  * Please refer to the NVIDIA end user license agreement (EULA) associated
  * with this source code for terms and conditions that govern your use of
@@ -21,15 +21,15 @@
 *                 on Windows, please download the Microsoft HPC Pack SDK 2008
 */
 
+// MPI include
+#include <mpi.h>
+
 // System includes
 #include <iostream>
 
 using std::cout;
 using std::cerr;
 using std::endl;
-
-// MPI include
-#include <mpi.h>
 
 // User include
 #include "simpleMPI.h"

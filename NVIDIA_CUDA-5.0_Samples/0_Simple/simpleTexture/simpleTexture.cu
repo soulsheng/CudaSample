@@ -1,5 +1,5 @@
 /*
- * Copyright 1993-2013 NVIDIA Corporation.  All rights reserved.
+ * Copyright 1993-2014 NVIDIA Corporation.  All rights reserved.
  *
  * Please refer to the NVIDIA end user license agreement (EULA) associated
  * with this source code for terms and conditions that govern your use of
@@ -69,17 +69,16 @@ __global__ void transformKernel(float *outputData,
     unsigned int x = blockIdx.x*blockDim.x + threadIdx.x;
     unsigned int y = blockIdx.y*blockDim.y + threadIdx.y;
 
-    float u = x / (float) width;
-    float v = y / (float) height;
+    float u = (float)x - (float)width/2; 
+    float v = (float)y - (float)height/2; 
+    float tu = u*cosf(theta) - v*sinf(theta); 
+    float tv = v*cosf(theta) + u*sinf(theta); 
 
-    // transform coordinates
-    u -= 0.5f;
-    v -= 0.5f;
-    float tu = u*cosf(theta) - v*sinf(theta) + 0.5f;
-    float tv = v*cosf(theta) + u*sinf(theta) + 0.5f;
+    tu /= (float)width; 
+    tv /= (float)height; 
 
     // read from texture and write to global memory
-    outputData[y*width + x] = tex2D(tex, tu, tv);
+    outputData[y*width + x] = tex2D(tex, tu+0.5f, tv+0.5f);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -155,7 +154,7 @@ void runTest(int argc, char **argv)
     unsigned int size = width * height * sizeof(float);
     printf("Loaded '%s', %d x %d pixels\n", imageFilename, width, height);
 
-    // Load reference image from image (output)
+    //Load reference image from image (output)
     float *hDataRef = (float *) malloc(size);
     char *refPath = sdkFindFilePath(refFilename, argv[0]);
 

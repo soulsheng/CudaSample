@@ -59,4 +59,14 @@
 
     <!-- Nsight EE does not support driver API samples import -->
     <no-nsight-eclipse/>
+    <recipe>
+        <name>vectorAddDrv</name>
+        <ptx>vectorAdd_kernel</ptx>
+        <libraries>
+            <library>cuda</library>
+        </libraries>
+        <supportedbuilds>
+            <build>makefile</build>
+        </supportedbuilds>
+    </recipe>
 </entry>

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// Copyright 1993-2013 NVIDIA Corporation.  All rights reserved.
+// Copyright 1993-2014 NVIDIA Corporation.  All rights reserved.
 //
 // Please refer to the NVIDIA end user license agreement (EULA) associated
 // with this source code for terms and conditions that govern your use of
@@ -20,25 +20,25 @@
 
 // SOME PRECAUTIONS:
 // IF WE WANT TO CALCULATE ROW-MAJOR MATRIX MULTIPLY C = A * B,
-// WE JUST NEED CALL CUBLAS API IN A REVERSE ORDER: cublasSegemm(B, A)! 
+// WE JUST NEED CALL CUBLAS API IN A REVERSE ORDER: cublasSegemm(B, A)!
 // The reason is explained as follows:
 
 // CUBLAS library uses column-major storage, but C/C++ use row-major storage.
-// When passing the matrix pointer to CUBLAS, the memory layout alters from 
-// row-major to column-major, which is equivalent to an implict transpose. 
+// When passing the matrix pointer to CUBLAS, the memory layout alters from
+// row-major to column-major, which is equivalent to an implict transpose.
 
-// In the case of row-major C/C++ matrix A, B, and a simple matrix multiplication 
+// In the case of row-major C/C++ matrix A, B, and a simple matrix multiplication
 // C = A * B, we can't use the input order like cublasSgemm(A, B)  because of
-// implict transpose. The actual result of cublasSegemm(A, B) is A(T) * B(T). 
-// If col(A(T)) != row(B(T)), equal to row(A) != col(B), A(T) and B(T) are not 
-// multipliable. Moreover, even if A(T) and B(T) are multipliable, the result C 
-// is a column-based cublas matrix, which means C(T) in C/C++, we need extra 
+// implict transpose. The actual result of cublasSegemm(A, B) is A(T) * B(T).
+// If col(A(T)) != row(B(T)), equal to row(A) != col(B), A(T) and B(T) are not
+// multipliable. Moreover, even if A(T) and B(T) are multipliable, the result C
+// is a column-based cublas matrix, which means C(T) in C/C++, we need extra
 // transpose code to convert it to a row-based C/C++ matrix.
 
-// To solve the problem, let's consider our desired result C, a row-major matrix. 
-// In cublas format, it is C(T) actually (becuase of the implict transpose). 
-// C = A * B, so C(T) = (A * B) (T) = B(T) * A(T). Cublas matrice B(T) and A(T) 
-// happen to be C/C++ matrice B and A (still becuase of the implict transpose)! 
+// To solve the problem, let's consider our desired result C, a row-major matrix.
+// In cublas format, it is C(T) actually (becuase of the implict transpose).
+// C = A * B, so C(T) = (A * B) (T) = B(T) * A(T). Cublas matrice B(T) and A(T)
+// happen to be C/C++ matrice B and A (still becuase of the implict transpose)!
 // We don't need extra transpose code, we only need alter the input order!
 //
 // CUBLAS provides high-performance matrix multiplication.
@@ -50,7 +50,7 @@
 
 // Utilities and system includes
 #include <assert.h>
-#include <helper_string.h>  // helper for shared functions common to CUDA SDK samples
+#include <helper_string.h>  // helper for shared functions common to CUDA Samples
 
 // CUDA runtime
 #include <cuda_runtime.h>
@@ -70,15 +70,6 @@ typedef struct _matrixSize      // Optional Command-line multiplier for matrix s
 {
     unsigned int uiWA, uiHA, uiWB, uiHB, uiWC, uiHC;
 } sMatrixSize;
-
-// Matrix dimensions
-// (chosen as multiples of the thread block size for simplicity)
-#define WA (32 * block_size) // Matrix A width
-#define HA (32 * block_size) // Matrix A height
-#define WB (32 * block_size) // Matrix B width
-#define HB WA  // Matrix B height
-#define WC WB  // Matrix C width 
-#define HC HA  // Matrix C height
 
 ////////////////////////////////////////////////////////////////////////////////
 //! Compute reference data set matrix multiply on CPU
@@ -212,12 +203,12 @@ void initializeCUDA(int argc, char **argv, int &devID, int &iSizeMultiple, sMatr
     // use a larger block size for Fermi and above
     int block_size = (deviceProp.major < 2) ? 16 : 32;
 
-    matrix_size.uiWA = WA;
-    matrix_size.uiHA = HA;
-    matrix_size.uiWB = WB;
-    matrix_size.uiHB = HB;
-    matrix_size.uiWC = WC;
-    matrix_size.uiHC = HC;
+    matrix_size.uiWA = 2 * block_size * iSizeMultiple;
+    matrix_size.uiHA = 4 * block_size * iSizeMultiple;
+    matrix_size.uiWB = 2 * block_size * iSizeMultiple;
+    matrix_size.uiHB = 4 * block_size * iSizeMultiple;
+    matrix_size.uiWC = 2 * block_size * iSizeMultiple;
+    matrix_size.uiHC = 4 * block_size * iSizeMultiple;
 
     printf("MatrixA(%u,%u), MatrixB(%u,%u), MatrixC(%u,%u)\n",
            matrix_size.uiWA, matrix_size.uiHA,
@@ -287,20 +278,6 @@ int matrixMultiply(int argc, char **argv, int devID, sMatrixSize &matrix_size)
         exit(EXIT_FAILURE);
     }
 
-	error = cudaMalloc((void **) &d_C, mem_size_C);
-
-	if (error != cudaSuccess)
-	{
-		printf("cudaMalloc d_C returned error code %d, line(%d)\n", error, __LINE__);
-		exit(EXIT_FAILURE);
-	}
-
-	// create and start timer
-	StopWatchInterface *timerMemIn = NULL;
-	sdkCreateTimer(&timerMemIn);
-	// start the timer
-	sdkStartTimer(&timerMemIn);
-
     // copy host memory to device
     error = cudaMemcpy(d_A, h_A, mem_size_A, cudaMemcpyHostToDevice);
 
@@ -318,9 +295,13 @@ int matrixMultiply(int argc, char **argv, int devID, sMatrixSize &matrix_size)
         exit(EXIT_FAILURE);
     }
 
-	sdkStopTimer(&timerMemIn);
-	printf("\nMemory H2D Transferring time: %f (ms)\n", sdkGetTimerValue(&timerMemIn));
-	sdkDeleteTimer(&timerMemIn);
+    error = cudaMalloc((void **) &d_C, mem_size_C);
+
+    if (error != cudaSuccess)
+    {
+        printf("cudaMalloc d_C returned error code %d, line(%d)\n", error, __LINE__);
+        exit(EXIT_FAILURE);
+    }
 
     // setup execution parameters
     dim3 threads(block_size, block_size);
@@ -437,18 +418,8 @@ int matrixMultiply(int argc, char **argv, int devID, sMatrixSize &matrix_size)
             msecPerMatrixMul,
             flopsPerMatrixMul);
 
-		// create and start timer
-		StopWatchInterface *timerMemOut = NULL;
-		sdkCreateTimer(&timerMemOut);
-		// start the timer
-		sdkStartTimer(&timerMemOut);
-
         // copy result from device to host
         error = cudaMemcpy(h_CUBLAS, d_C, mem_size_C, cudaMemcpyDeviceToHost);
-
-		sdkStopTimer(&timerMemOut);
-		printf("\Memory D2H Transferring time: %f (ms)\n", sdkGetTimerValue(&timerMemOut));
-		sdkDeleteTimer(&timerMemOut);
 
         if (error != cudaSuccess)
         {
@@ -462,19 +433,7 @@ int matrixMultiply(int argc, char **argv, int devID, sMatrixSize &matrix_size)
     // compute reference solution
     printf("Computing result using host CPU...");
     float *reference = (float *)malloc(mem_size_C);
-
-	// create and start timer
-	StopWatchInterface *timer = NULL;
-	sdkCreateTimer(&timer);
-	// start the timer
-	sdkStartTimer(&timer);
-
     matrixMulCPU(reference, h_A, h_B, matrix_size.uiHA, matrix_size.uiWA, matrix_size.uiWB);
-
-	sdkStopTimer(&timer);
-	printf("\nCPU Processing time: %f (ms)\n", sdkGetTimerValue(&timer));
-	sdkDeleteTimer(&timer);
-
     printf("done.\n");
 
     // check result (CUBLAS)
@@ -496,6 +455,11 @@ int matrixMultiply(int argc, char **argv, int devID, sMatrixSize &matrix_size)
     cudaFree(d_B);
     cudaFree(d_C);
 
+    // cudaDeviceReset causes the driver to clean up all state. While
+    // not mandatory in normal operation, it is good practice.  It is also
+    // needed to ensure correct operation when the application is being
+    // profiled. Calling cudaDeviceReset causes all profile data to be
+    // flushed before the application exits
     cudaDeviceReset();
 
     if (resCUBLAS == true)

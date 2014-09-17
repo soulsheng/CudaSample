@@ -1,5 +1,5 @@
 /*
- * Copyright 1993-2013 NVIDIA Corporation.  All rights reserved.
+ * Copyright 1993-2014 NVIDIA Corporation.  All rights reserved.
  *
  * Please refer to the NVIDIA end user license agreement (EULA) associated
  * with this source code for terms and conditions that govern your use of
@@ -33,7 +33,7 @@ const char *sSDKname = "simpleMultiCopy";
 
 // includes, project
 #include <helper_cuda.h>
-#include <helper_functions.h>  // helper for shared that are common to CUDA SDK samples
+#include <helper_functions.h>  // helper for shared that are common to CUDA Samples
 
 // includes, kernels
 // Declare the CUDA kernels here and main() code that is needed to launch
@@ -279,6 +279,11 @@ int main(int argc, char *argv[])
     cudaEventDestroy(start);
     cudaEventDestroy(stop);
 
+    // cudaDeviceReset causes the driver to clean up all state. While
+    // not mandatory in normal operation, it is good practice.  It is also
+    // needed to ensure correct operation when the application is being
+    // profiled. Calling cudaDeviceReset causes all profile data to be
+    // flushed before the application exits
     cudaDeviceReset();
 
     // Test result

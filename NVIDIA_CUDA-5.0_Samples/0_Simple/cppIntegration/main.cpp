@@ -1,5 +1,5 @@
 /*
- * Copyright 1993-2013 NVIDIA Corporation.  All rights reserved.
+ * Copyright 1993-2014 NVIDIA Corporation.  All rights reserved.
  *
  * Please refer to the NVIDIA end user license agreement (EULA) associated
  * with this source code for terms and conditions that govern your use of
@@ -61,13 +61,19 @@ main(int argc, char **argv)
     std::cout << str << std::endl;
 
     char str_device[16];
+
     for (int i = 0; i < len; i++)
     {
-      	str_device[i] = (char)(i2[i].x);
+        str_device[i] = (char)(i2[i].x);
     }
 
-    std::cout << str_device << std::endl;    
+    std::cout << str_device << std::endl;
 
+    // cudaDeviceReset causes the driver to clean up all state. While
+    // not mandatory in normal operation, it is good practice.  It is also
+    // needed to ensure correct operation when the application is being
+    // profiled. Calling cudaDeviceReset causes all profile data to be
+    // flushed before the application exits
     cudaDeviceReset();
     exit(bTestResult ? EXIT_SUCCESS : EXIT_FAILURE);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 1993-2013 NVIDIA Corporation.  All rights reserved.
+ * Copyright 1993-2014 NVIDIA Corporation.  All rights reserved.
  *
  * Please refer to the NVIDIA end user license agreement (EULA) associated
  * with this source code for terms and conditions that govern your use of
@@ -85,9 +85,18 @@ int main(int argc, const char *argv[])
 
     int deviceCount;
     checkCudaErrors(cudaGetDeviceCount(&deviceCount));
-    printf("Device Count: %d\n", deviceCount);
+    printf("DevicecheckCudaErrors Count: %d\n", deviceCount);
 
     int deviceID = findCudaDevice(argc, argv);
+	cudaDeviceProp prop;
+	checkCudaErrors(cudaGetDeviceProperties(&prop, deviceID));
+	if (prop.major < 2)    
+    {
+        printf("ERROR: cppOverload requires GPU devices with compute SM 2.0 or higher.\n");
+        printf("Current GPU device has compute SM%d.%d, Exiting...", prop.major, prop.minor);
+        exit(EXIT_SUCCESS);
+    }
+	
     checkCudaErrors(cudaSetDevice(deviceID));
 
     // Allocate device memory
@@ -158,6 +167,12 @@ int main(int argc, const char *argv[])
     checkCudaErrors(cudaFreeHost(hInput));
 
     checkCudaErrors(cudaDeviceSynchronize());
+
+    // cudaDeviceReset causes the driver to clean up all state. While
+    // not mandatory in normal operation, it is good practice.  It is also
+    // needed to ensure correct operation when the application is being
+    // profiled. Calling cudaDeviceReset causes all profile data to be
+    // flushed before the application exits
     checkCudaErrors(cudaDeviceReset());
 
     exit(testResult ? EXIT_SUCCESS : EXIT_FAILURE);

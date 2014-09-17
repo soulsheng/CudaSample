@@ -1,5 +1,5 @@
 /*
- * Copyright 1993-2013 NVIDIA Corporation.  All rights reserved.
+ * Copyright 1993-2014 NVIDIA Corporation.  All rights reserved.
  *
  * Please refer to the NVIDIA end user license agreement (EULA) associated
  * with this source code for terms and conditions that govern your use of
@@ -152,7 +152,9 @@ inline int _ConvertSMVer2Cores(int major, int minor)
         { 0x20, 32 }, // Fermi Generation (SM 2.0) GF100 class
         { 0x21, 48 }, // Fermi Generation (SM 2.1) GF10x class
         { 0x30, 192}, // Kepler Generation (SM 3.0) GK10x class
+        { 0x32, 192}, // Kepler Generation (SM 3.2) GK10x class
         { 0x35, 192}, // Kepler Generation (SM 3.5) GK11x class
+        { -1, 192},   // Default case
     };
 
     int index = 0;
@@ -168,8 +170,8 @@ inline int _ConvertSMVer2Cores(int major, int minor)
     }
 
     // If we don't find the values, we default use the previous one to run properly
-    printf("MapSMtoCores for SM %d.%d is undefined.  Default to use %d Cores/SM\n", major, minor, nGpuArchCoresPerSM[7].Cores);
-    return nGpuArchCoresPerSM[7].Cores;
+    printf("MapSMtoCores for SM %d.%d is undefined.  Default to use %d Cores/SM\n", major, minor, nGpuArchCoresPerSM[index].Cores);
+    return nGpuArchCoresPerSM[index].Cores;
 }
 // end of GPU Architecture definitions
 
@@ -393,7 +395,7 @@ runTest(int argc, char **argv)
     checkCudaErrors(cuParamSetTexRef(transform, CU_PARAM_TR_DEFAULT, cu_texref));
 
     // There are two ways to launch CUDA kernels via the Driver API.
-    // In this SDK sample, we illustrate both ways to pass parameters
+    // In this CUDA Sample, we illustrate both ways to pass parameters
     // and specify parameters.  By default we use the simpler method.
     int block_size = 8;
     StopWatchInterface *timer = NULL;
@@ -597,7 +599,7 @@ initCUDA(int argc, char **argv, CUfunction *transform)
         // in this branch we use compilation with parameters
         const unsigned int jitNumOptions = 3;
         CUjit_option *jitOptions = new CUjit_option[jitNumOptions];
-        void **jitOptVals = new void*[jitNumOptions];
+        void **jitOptVals = new void *[jitNumOptions];
 
         // set up size of compilation log buffer
         jitOptions[0] = CU_JIT_INFO_LOG_BUFFER_SIZE_BYTES;

@@ -1,5 +1,5 @@
 /*
- * Copyright 1993-2013 NVIDIA Corporation.  All rights reserved.
+ * Copyright 1993-2014 NVIDIA Corporation.  All rights reserved.
  *
  * Please refer to the NVIDIA end user license agreement (EULA) associated
  * with this source code for terms and conditions that govern your use of
@@ -175,7 +175,7 @@ runTest(int argc, char **argv)
     sdkStartTimer(&timer);
 
     // There are two ways to launch CUDA kernels via the Driver API.
-    // In this SDK sample, we illustrate both ways to pass parameters
+    // In this CUDA Sample, we illustrate both ways to pass parameters
     // and specify parameters.  By default we use the simpler method.
     dim3 block(block_size   , block_size   , 1);
     dim3 grid(WC/block_size, HC/block_size, 1);
@@ -258,14 +258,13 @@ runTest(int argc, char **argv)
                                        NULL, NULL, (void **)&kernel_launch_config));
     }
 
-	// stop and destroy timer
-	cuCtxSynchronize();
+    // copy result from device to host
+    checkCudaErrors(cuMemcpyDtoH((void *) h_C, d_C, mem_size_C));
+
+    // stop and destroy timer
     sdkStopTimer(&timer);
     printf("Processing time: %f (ms)\n", sdkGetTimerValue(&timer));
     sdkDeleteTimer(&timer);
-
-	// copy result from device to host
-	checkCudaErrors(cuMemcpyDtoH((void *) h_C, d_C, mem_size_C));
 
     printf("Checking computed result for correctness: ");
     bool correct = true;
@@ -274,7 +273,7 @@ runTest(int argc, char **argv)
     {
         if (fabs(h_C[i] - (WA * valB)) > 1e-5)
         {
-            //printf("Error! Matrix[%05d]=%.8f, ref=%.8f error term is > 1e-5\n", i, h_C[i], WA*valB);
+            printf("Error! Matrix[%05d]=%.8f, ref=%.8f error term is > 1e-5\n", i, h_C[i], WA*valB);
             correct = false;
         }
     }
@@ -401,7 +400,7 @@ initCUDA(int argc, char **argv, CUfunction *pMatrixMul, int *block_size_out)
         // in this branch we use compilation with parameters
         const unsigned int jitNumOptions = 3;
         CUjit_option *jitOptions = new CUjit_option[jitNumOptions];
-        void **jitOptVals = new void*[jitNumOptions];
+        void **jitOptVals = new void *[jitNumOptions];
 
         // set up size of compilation log buffer
         jitOptions[0] = CU_JIT_INFO_LOG_BUFFER_SIZE_BYTES;

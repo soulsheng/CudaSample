@@ -1,5 +1,5 @@
 /*
- * Copyright 1993-2013 NVIDIA Corporation.  All rights reserved.
+ * Copyright 1993-2014 NVIDIA Corporation.  All rights reserved.
  *
  * Please refer to the NVIDIA end user license agreement (EULA) associated
  * with this source code for terms and conditions that govern your use of
@@ -373,6 +373,7 @@ int main(int argc, char **argv)
         init_array<<<blocks, threads>>>(d_a, d_c, niterations);
         checkCudaErrors(cudaMemcpy(hAligned_a, d_a, nbytes, cudaMemcpyDeviceToHost));
     }
+
     checkCudaErrors(cudaEventRecord(stop_event, 0));
     checkCudaErrors(cudaEventSynchronize(stop_event));
     checkCudaErrors(cudaEventElapsedTime(&elapsed_time, start_event, stop_event));
@@ -401,7 +402,7 @@ int main(int argc, char **argv)
             checkCudaErrors(cudaMemcpyAsync(hAligned_a + i * n / nstreams, d_a + i * n / nstreams, nbytes / nstreams, cudaMemcpyDeviceToHost, streams[i]));
         }
     }
-    
+
     checkCudaErrors(cudaEventRecord(stop_event, 0));
     checkCudaErrors(cudaEventSynchronize(stop_event));
     checkCudaErrors(cudaEventElapsedTime(&elapsed_time, start_event, stop_event));
@@ -416,6 +417,7 @@ int main(int argc, char **argv)
     {
         checkCudaErrors(cudaStreamDestroy(streams[i]));
     }
+
     checkCudaErrors(cudaEventDestroy(start_event));
     checkCudaErrors(cudaEventDestroy(stop_event));
 
@@ -425,6 +427,11 @@ int main(int argc, char **argv)
     checkCudaErrors(cudaFree(d_a));
     checkCudaErrors(cudaFree(d_c));
 
+    // cudaDeviceReset causes the driver to clean up all state. While
+    // not mandatory in normal operation, it is good practice.  It is also
+    // needed to ensure correct operation when the application is being
+    // profiled. Calling cudaDeviceReset causes all profile data to be
+    // flushed before the application exits
     checkCudaErrors(cudaDeviceReset());
 
     return bResults ? EXIT_SUCCESS : EXIT_FAILURE;

@@ -57,4 +57,25 @@ To illustrate GPU performance for matrix multiply, this sample also shows how to
 
     <!-- Collection of [OS][:arch] tokens -->
     <supported-env>linux:x86_64, linux:i686, windows7, macosx:x86_64, macosx:i686, :arm</supported-env>
+    <recipe>
+        <name>matrixMulCUBLAS</name>
+        <gencode>
+            <sm>10</sm>
+            <sm>20</sm>
+            <sm>30</sm>
+            <sm>32</sm>
+            <sm>35</sm>
+            
+            <sm>50</sm>
+        </gencode>
+        <libraries>
+            <library>cublas</library>
+        </libraries>
+        <sources>
+            <ignore>new/matrixMulCUBLAS.cpp</ignore>
+        </sources>
+        <supportedbuilds>
+            <build>makefile</build>
+        </supportedbuilds>
+    </recipe>
 </entry>

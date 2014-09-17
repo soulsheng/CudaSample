@@ -1,5 +1,5 @@
 /*
- * Copyright 1993-2013 NVIDIA Corporation.  All rights reserved.
+ * Copyright 1993-2014 NVIDIA Corporation.  All rights reserved.
  *
  * Please refer to the NVIDIA end user license agreement (EULA) associated
  * with this source code for terms and conditions that govern your use of
@@ -66,7 +66,8 @@ typedef struct __align__(8)
 {
     int threadid;                           // CUPRINTF_UNRESTRICTED for unrestricted
     int blockid;                            // CUPRINTF_UNRESTRICTED for unrestricted
-} cuPrintfRestriction;
+}
+cuPrintfRestriction;
 
 // The main storage is in a global print buffer, which has a known
 // start/end/length. These are atomically updated so it works as a
@@ -89,7 +90,8 @@ typedef struct __align__(8)
     unsigned short fmtoffset;               // Offset of fmt string into buffer
     unsigned short blockid;                 // Block ID of author
     unsigned short threadid;                // Thread ID of author
-} cuPrintfHeader;
+}
+cuPrintfHeader;
 
 // Special header for sm_10 architecture
 #define CUPRINTF_SM10_MAGIC   0xC810        // Not a valid ascii character
@@ -100,7 +102,8 @@ typedef struct __align__(16)
     unsigned int thread_index;              // thread ID for this buffer
     unsigned int thread_buf_len;            // per-thread buffer length
     unsigned int offset;                    // most recent printf's offset
-} cuPrintfHeaderSM10;
+}
+cuPrintfHeaderSM10;
 
 
 // Because we can't write an element which is not aligned to its bit-size,
@@ -610,7 +613,7 @@ static int outputPrintfData(char *fmt, char *data)
 
         switch (specifier)
         {
-                // These all take integer arguments
+            // These all take integer arguments
             case 'c':
             case 'd':
             case 'i':
@@ -622,7 +625,7 @@ static int outputPrintfData(char *fmt, char *data)
                 fprintf(printf_fp, format, *((int *)data));
                 break;
 
-                // These all take double arguments
+            // These all take double arguments
             case 'e':
             case 'E':
             case 'f':
@@ -641,17 +644,17 @@ static int outputPrintfData(char *fmt, char *data)
 
                 break;
 
-                // Strings are handled in a special way
+            // Strings are handled in a special way
             case 's':
                 fprintf(printf_fp, format, (char *)data);
                 break;
 
-                // % is special
+            // % is special
             case '%':
                 fprintf(printf_fp, "%%");
                 break;
 
-                // Everything else is just printed out as-is
+            // Everything else is just printed out as-is
             default:
                 fprintf(printf_fp, "%s", format);
                 break;

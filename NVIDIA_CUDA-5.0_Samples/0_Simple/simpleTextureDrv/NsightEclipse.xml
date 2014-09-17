@@ -73,4 +73,17 @@
 
     <!-- Nsight EE does not support driver API samples import -->
     <no-nsight-eclipse/>
+    <recipe>
+        <name>simpleTextureDrv</name>
+        <ptx>simpleTexture_kernel</ptx>
+        <libraries>
+            <library>cuda</library>
+        </libraries>
+        <cleanextras>
+            <clean>./data/lena_bw_out.pgm</clean>
+        </cleanextras>
+        <supportedbuilds>
+            <build>makefile</build>
+        </supportedbuilds>
+    </recipe>
 </entry>

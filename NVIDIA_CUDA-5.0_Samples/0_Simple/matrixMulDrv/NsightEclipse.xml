@@ -64,4 +64,14 @@ CUBLAS provides high-performance matrix multiplication.]]></description>
 
     <!-- Nsight EE does not support driver API samples import -->
     <no-nsight-eclipse/>
+    <recipe>
+        <name>matrixMulDrv</name>
+        <libraries>
+            <library>cuda</library>
+        </libraries>
+        <ptx>matrixMul_kernel</ptx>
+        <supportedbuilds>
+            <build>makefile</build>
+        </supportedbuilds>
+    </recipe>
 </entry>

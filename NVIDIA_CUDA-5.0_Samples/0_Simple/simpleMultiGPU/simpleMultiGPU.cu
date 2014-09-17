@@ -1,5 +1,5 @@
 /*
- * Copyright 1993-2013 NVIDIA Corporation.  All rights reserved.
+ * Copyright 1993-2014 NVIDIA Corporation.  All rights reserved.
  *
  * Please refer to the NVIDIA end user license agreement (EULA) associated
  * with this source code for terms and conditions that govern your use of
@@ -45,7 +45,7 @@ const int DATA_N        = 1048576 * 32;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Simple reduction kernel.
-// Refer to the 'reduction' CUDA SDK sample describing
+// Refer to the 'reduction' CUDA Sample describing
 // reduction optimization strategies
 ////////////////////////////////////////////////////////////////////////////////
 __global__ static void reduceKernel(float *d_Result, float *d_Input, int N)
@@ -213,6 +213,12 @@ int main(int argc, char **argv)
     {
         checkCudaErrors(cudaSetDevice(i));
         checkCudaErrors(cudaFreeHost(plan[i].h_Data));
+
+        // cudaDeviceReset causes the driver to clean up all state. While
+        // not mandatory in normal operation, it is good practice.  It is also
+        // needed to ensure correct operation when the application is being
+        // profiled. Calling cudaDeviceReset causes all profile data to be
+        // flushed before the application exits
         cudaDeviceReset();
     }
 

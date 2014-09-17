@@ -1,5 +1,5 @@
 /*
-* Copyright 1993-2013 NVIDIA Corporation.  All rights reserved.
+* Copyright 1993-2014 NVIDIA Corporation.  All rights reserved.
 *
 * Please refer to the NVIDIA end user license agreement (EULA) associated
 * with this source code for terms and conditions that govern your use of
@@ -133,6 +133,12 @@ main(int argc, char **argv)
     if (deviceProps.major < 2)
     {
         printf("%s requires SM 2.0 or higher for support of Texture Arrays.  Test will exit... \n", sSDKname);
+
+        // cudaDeviceReset causes the driver to clean up all state. While
+        // not mandatory in normal operation, it is good practice.  It is also
+        // needed to ensure correct operation when the application is being
+        // profiled. Calling cudaDeviceReset causes all profile data to be
+        // flushed before the application exits
         cudaDeviceReset();
         exit(EXIT_SUCCESS);
     }
@@ -244,6 +250,11 @@ main(int argc, char **argv)
     checkCudaErrors(cudaFree(d_data));
     checkCudaErrors(cudaFreeArray(cu_3darray));
 
+    // cudaDeviceReset causes the driver to clean up all state. While
+    // not mandatory in normal operation, it is good practice.  It is also
+    // needed to ensure correct operation when the application is being
+    // profiled. Calling cudaDeviceReset causes all profile data to be
+    // flushed before the application exits
     cudaDeviceReset();
     exit(bResult ? EXIT_SUCCESS : EXIT_FAILURE);
 }

@@ -1,8 +1,6 @@
-Sample: Pitch Linear Texture
-Minimum spec: GeForce 8
+Sample: simplePitchLinearTexture
+Minimum spec: SM 1.0
 
 Use of Pitch Linear Textures
 
 Key concepts:
-Texture
-Image Processing

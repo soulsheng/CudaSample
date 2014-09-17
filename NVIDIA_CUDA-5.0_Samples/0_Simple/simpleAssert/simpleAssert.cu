@@ -1,5 +1,5 @@
 /*
- * Copyright 1993-2013 NVIDIA Corporation.  All rights reserved.
+ * Copyright 1993-2014 NVIDIA Corporation.  All rights reserved.
  *
  * Please refer to the NVIDIA end user license agreement (EULA) associated
  * with this source code for terms and conditions that govern your use of
@@ -8,11 +8,6 @@
  * is strictly prohibited.
  *
  */
-
-// Includes, system
-#include <stdio.h>
-#include <cassert>
-
 #ifdef _WIN32
 #  define WINDOWS_LEAN_AND_MEAN
 #  define NOMINMAX
@@ -20,6 +15,10 @@
 #else
 #  include <sys/utsname.h>
 #endif
+
+// Includes, system
+#include <stdio.h>
+#include <cassert>
 
 // Includes CUDA
 #include <cuda_runtime.h>
@@ -61,6 +60,11 @@ int main(int argc, char **argv)
 
     runTest(argc, argv);
 
+    // cudaDeviceReset causes the driver to clean up all state. While
+    // not mandatory in normal operation, it is good practice.  It is also
+    // needed to ensure correct operation when the application is being
+    // profiled. Calling cudaDeviceReset causes all profile data to be
+    // flushed before the application exits
     cudaDeviceReset();
     printf("%s completed, returned %s\n",
            sampleName,
@@ -103,6 +107,12 @@ void runTest(int argc, char **argv)
     {
         printf("simpleAssert requires a GPU with compute capability "
                "2.0 or later, exiting...\n");
+
+        // cudaDeviceReset causes the driver to clean up all state. While
+        // not mandatory in normal operation, it is good practice.  It is also
+        // needed to ensure correct operation when the application is being
+        // profiled. Calling cudaDeviceReset causes all profile data to be
+        // flushed before the application exits
         cudaDeviceReset();
         exit(EXIT_SUCCESS);
     }

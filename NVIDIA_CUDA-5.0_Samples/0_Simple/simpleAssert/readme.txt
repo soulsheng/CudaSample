@@ -1,8 +1,6 @@
 Sample: simpleAssert
-Minimum spec: GeForce GTX 400
+Minimum spec: SM 2.0
 
 
 
 Key concepts:
-CUDA Basic Concepts
-Assert

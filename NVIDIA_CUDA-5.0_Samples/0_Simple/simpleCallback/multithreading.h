@@ -1,5 +1,5 @@
 /*
- * Copyright 1993-2013 NVIDIA Corporation.  All rights reserved.
+ * Copyright 1993-2014 NVIDIA Corporation.  All rights reserved.
  *
  * Please refer to the NVIDIA end user license agreement (EULA) associated
  * with this source code for terms and conditions that govern your use of
@@ -15,7 +15,7 @@
 
 //Simple portable thread library.
 
-#if _WIN32
+#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
 //Windows threads.
 #include <windows.h>
 
@@ -58,29 +58,29 @@ struct CUTBarrier
 extern "C" {
 #endif
 
-    //Create thread.
-    CUTThread cutStartThread(CUT_THREADROUTINE, void *data);
+//Create thread.
+CUTThread cutStartThread(CUT_THREADROUTINE, void *data);
 
-    //Wait for thread to finish.
-    void cutEndThread(CUTThread thread);
+//Wait for thread to finish.
+void cutEndThread(CUTThread thread);
 
-    //Destroy thread.
-    void cutDestroyThread(CUTThread thread);
+//Destroy thread.
+void cutDestroyThread(CUTThread thread);
 
-    //Wait for multiple threads.
-    void cutWaitForThreads(const CUTThread *threads, int num);
+//Wait for multiple threads.
+void cutWaitForThreads(const CUTThread *threads, int num);
 
-    //Create barrier.
-    CUTBarrier cutCreateBarrier(int releaseCount);
+//Create barrier.
+CUTBarrier cutCreateBarrier(int releaseCount);
 
-    //Increment barrier. (excution continues)
-    void cutIncrementBarrier(CUTBarrier *barrier);
+//Increment barrier. (excution continues)
+void cutIncrementBarrier(CUTBarrier *barrier);
 
-    //Wait for barrier release.
-    void cutWaitForBarrier(CUTBarrier *barrier);
+//Wait for barrier release.
+void cutWaitForBarrier(CUTBarrier *barrier);
 
-    //Destory barrier
-    void cutDestroyBarrier(CUTBarrier *barrier);
+//Destory barrier
+void cutDestroyBarrier(CUTBarrier *barrier);
 
 
 #ifdef __cplusplus

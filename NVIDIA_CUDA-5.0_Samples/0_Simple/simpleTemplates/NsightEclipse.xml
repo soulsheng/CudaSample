@@ -34,6 +34,8 @@
     <sm-arch>sm10</sm-arch>
     <sm-arch>sm20</sm-arch>
     <sm-arch>sm30</sm-arch>
+    <sm-arch>sm50</sm-arch>
+    <sm-arch>sm32</sm-arch>
 
     <!-- One of "exe|dll|lib" (exe is default) -->
     <type>exe</type>
@@ -43,4 +45,19 @@
 
     <!-- Collection of [OS][:arch] tokens -->
     <supported-env>linux:x86_64, linux:i686, windows7, macosx:x86_64, macosx:i686, :arm</supported-env>
+    <recipe>
+        <name>simpleTemplates</name>
+        <gencode>
+            <sm>10</sm>
+            <sm>20</sm>
+            <sm>30</sm>
+            <sm>32</sm>
+            <sm>35</sm>
+            
+            <sm>50</sm>
+        </gencode>
+        <supportedbuilds>
+            <build>makefile</build>
+        </supportedbuilds>
+    </recipe>
 </entry>

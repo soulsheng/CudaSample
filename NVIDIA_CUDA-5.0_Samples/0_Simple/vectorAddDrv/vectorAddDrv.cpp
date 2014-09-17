@@ -1,5 +1,5 @@
 /*
- * Copyright 1993-2013 NVIDIA Corporation.  All rights reserved.
+ * Copyright 1993-2014 NVIDIA Corporation.  All rights reserved.
  *
  * Please refer to the NVIDIA end user license agreement (EULA) associated
  * with this source code for terms and conditions that govern your use of
@@ -145,6 +145,7 @@ inline int _ConvertSMVer2Cores(int major, int minor)
         { 0x20, 32 }, // Fermi Generation (SM 2.0) GF100 class
         { 0x21, 48 }, // Fermi Generation (SM 2.1) GF10x class
         { 0x30, 192}, // Kepler Generation (SM 3.0) GK10x class
+        { 0x32, 192}, // Kepler Generation (SM 3.2) GK10x class
         { 0x35, 192}, // Kepler Generation (SM 3.5) GK11x class
     };
 
@@ -403,7 +404,7 @@ int main(int argc, char **argv)
         // in this branch we use compilation with parameters
         const unsigned int jitNumOptions = 3;
         CUjit_option *jitOptions = new CUjit_option[jitNumOptions];
-        void **jitOptVals = new void*[jitNumOptions];
+        void **jitOptVals = new void *[jitNumOptions];
 
         // set up size of compilation log buffer
         jitOptions[0] = CU_JIT_INFO_LOG_BUFFER_SIZE_BYTES;
@@ -628,7 +629,8 @@ int main(int argc, char **argv)
             break;
         }
     }
-	printf("%s\n", (i==N) ? "Result = PASS" : "Result = FAIL");
+
+    printf("%s\n", (i==N) ? "Result = PASS" : "Result = FAIL");
     exit((i==N) ? EXIT_SUCCESS : EXIT_FAILURE);
 }
 
