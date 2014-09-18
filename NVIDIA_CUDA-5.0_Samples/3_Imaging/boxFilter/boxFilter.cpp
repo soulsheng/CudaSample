@@ -1,5 +1,5 @@
 /*
- * Copyright 1993-2013 NVIDIA Corporation.  All rights reserved.
+ * Copyright 1993-2014 NVIDIA Corporation.  All rights reserved.
  *
  * Please refer to the NVIDIA end user license agreement (EULA) associated
  * with this source code for terms and conditions that govern your use of
@@ -28,7 +28,10 @@
 // OpenGL Graphics includes
 #include <GL/glew.h>
 #if defined(__APPLE__) || defined(__MACOSX)
-#include <GLUT/glut.h>
+  #include <GLUT/glut.h>
+  #ifndef glutCloseFunc
+  #define glutCloseFunc glutWMCloseFunc
+  #endif
 #else
 #include <GL/freeglut.h>
 #endif
@@ -101,7 +104,7 @@ extern "C" void loadImageData(int argc, char **argv);
 extern "C" void computeGold(float *id, float *od, int w, int h, int n);
 
 // These are CUDA functions to handle allocation and launching the kernels
-extern "C" void   initTexture(int width, int height, void *pImage);
+extern "C" void   initTexture(int width, int height, void *pImage, bool useRGBA);
 extern "C" void   freeTextures();
 extern "C" double boxFilter(float *d_src, float *d_temp, float *d_dest, int width, int height,
                             int radius, int iterations, int nthreads, StopWatchInterface *timer);
@@ -277,14 +280,14 @@ void reshape(int x, int y)
     glOrtho(0.0, 1.0, 0.0, 1.0, 0.0, 1.0);
 }
 
-void initCuda()
+void initCuda(bool useRGBA)
 {
     // allocate device memory
     checkCudaErrors(cudaMalloc((void **) &d_img, (width * height * sizeof(unsigned int))));
     checkCudaErrors(cudaMalloc((void **) &d_temp, (width * height * sizeof(unsigned int))));
 
     // Refer to boxFilter_kernel.cu for implementation
-    initTexture(width, height, h_img);
+    initTexture(width, height, h_img, useRGBA);
 
     sdkCreateTimer(&timer);
     sdkCreateTimer(&kernel_timer);
@@ -408,7 +411,7 @@ int runBenchmark()
 {
     printf("[runBenchmark]: [%s]\n", sSDKsample);
 
-    initCuda();
+    initCuda(true);
 
     unsigned int *d_result;
     checkCudaErrors(cudaMalloc((void **)&d_result, width*height*sizeof(unsigned int)));
@@ -454,7 +457,7 @@ int runSingleTest(char *ref_file, char *exec_path)
 
     printf("[runSingleTest]: [%s]\n", sSDKsample);
 
-    initCuda();
+    initCuda(true);
 
     unsigned int *d_result;
     unsigned int *h_result = (unsigned int *)malloc(width * height * sizeof(unsigned int));
@@ -589,7 +592,7 @@ int findCapableDevice(int argc, char **argv)
     if (bestDev == -1)
     {
         fprintf(stderr, "\nNo configuration with available capabilities was found.  Test has been waived.\n");
-        fprintf(stderr, "The SDK sample minimum requirements:\n");
+        fprintf(stderr, "The CUDA Sample minimum requirements:\n");
         fprintf(stderr, "\tCUDA Compute Capability >= %d.%d is required\n", MIN_COMPUTE_VERSION/16, MIN_COMPUTE_VERSION%16);
         fprintf(stderr, "\tCUDA Runtime Version    >= %d.%d is required\n", MIN_RUNTIME_VERSION/1000, (MIN_RUNTIME_VERSION%100)/10);
         exit(EXIT_SUCCESS);
@@ -691,16 +694,25 @@ main(int argc, char **argv)
         }
         else
         {
+            // cudaDeviceReset causes the driver to clean up all state. While
+            // not mandatory in normal operation, it is good practice.  It is also
+            // needed to ensure correct operation when the application is being
+            // profiled. Calling cudaDeviceReset causes all profile data to be
+            // flushed before the application exits
             cudaDeviceReset();
             exit(EXIT_SUCCESS);
         }
 
         // Now we can create a CUDA context and bind it to the OpenGL context
-        initCuda();
+        initCuda(true);
         initGLResources();
 
         // sets the callback function so it will call cleanup upon exit
+#if defined (__APPLE__) || defined(MACOSX)
         atexit(cleanup);
+#else
+        glutCloseFunc(cleanup);
+#endif
 
         printf("Running Standard Demonstration with GLUT loop...\n\n");
         printf("Press '+' and '-' to change filter width\n"
@@ -710,6 +722,11 @@ main(int argc, char **argv)
         // Main OpenGL loop that will run visualization for every vsync
         glutMainLoop();
 
+        // cudaDeviceReset causes the driver to clean up all state. While
+        // not mandatory in normal operation, it is good practice.  It is also
+        // needed to ensure correct operation when the application is being
+        // profiled. Calling cudaDeviceReset causes all profile data to be
+        // flushed before the application exits
         cudaDeviceReset();
         exit(g_TotalErrors == 0 ? EXIT_SUCCESS : EXIT_FAILURE);
     }

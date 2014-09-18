@@ -34,56 +34,64 @@
 #
 ################################################################################
 
-# OS Name (Linux or Darwin)
-OSUPPER = $(shell uname -s 2>/dev/null | tr "[:lower:]" "[:upper:]")
-OSLOWER = $(shell uname -s 2>/dev/null | tr "[:upper:]" "[:lower:]")
-
-# Flags to detect 32-bit or 64-bit OS platform
-OS_SIZE = $(shell uname -m | sed -e "s/i.86/32/" -e "s/x86_64/64/" -e "s/armv7l/32/")
-OS_ARCH = $(shell uname -m | sed -e "s/i386/i686/")
-
 # Determine OS platform and unix distribution
 ifeq ("$(OSLOWER)","linux")
    # first search lsb_release
    DISTRO  = $(shell lsb_release -i -s 2>/dev/null | tr "[:upper:]" "[:lower:]")
    DISTVER = $(shell lsb_release -r -s 2>/dev/null)
-   # $(info DISTRO1 = $(DISTRO) $(DISTVER))
-   ifeq ($(DISTRO),)
+   ifeq ("$(DISTRO)","")
      # second search and parse /etc/issue
      DISTRO = $(shell more /etc/issue | awk '{print $$1}' | sed '1!d' | sed -e "/^$$/d" 2>/dev/null | tr "[:upper:]" "[:lower:]")
-     DISTVER= $(shell more /etc/issue | awk '{print $$2}' | sed '1!d' 2>/dev/null)
-     # $(info DISTRO2 = $(DISTRO) $(DISTVER))
+     DISTVER= $(shell more /etc/issue | awk '{print $$2}' | sed '1!d' 2>/dev/null
    endif
-   ifeq ($(DISTRO),)
+   ifeq ("$(DISTRO)","")
      # third, we can search in /etc/os-release or /etc/{distro}-release
      DISTRO = $(shell awk '/ID/' /etc/*-release | sed 's/ID=//' | grep -v "VERSION" | grep -v "ID" | grep -v "DISTRIB")
      DISTVER= $(shell awk '/DISTRIB_RELEASE/' /etc/*-release | sed 's/DISTRIB_RELEASE=//' | grep -v "DISTRIB_RELEASE")
-     # $(info DISTRO3 = $(DISTRO) $(DISTVER))
    endif
 endif
 
 ifeq ("$(OSUPPER)","LINUX")
     # $(info) >> findgllib.mk -> LINUX path <<<)
     # Each set of Linux Distros have different paths for where to find their OpenGL libraries reside
-    ifeq ("$(DISTRO)","ubuntu")
-        GLPATH    ?= /usr/lib/nvidia-current
-        GLLINK    ?= -L/usr/lib/nvidia-current
-        DFLT_PATH ?= /usr/lib
+    UBUNTU_PKG_NAME = "nvidia-331"
+	UBUNTU = $(shell echo $(DISTRO) | grep -i ubuntu >/dev/null 2>&1; echo $$?)
+	FEDORA = $(shell echo $(DISTRO) | grep -i fedora >/dev/null 2>&1; echo $$?)
+	RHEL   = $(shell echo $(DISTRO) | grep -i red    >/dev/null 2>&1; echo $$?)
+	CENTOS = $(shell echo $(DISTRO) | grep -i centos >/dev/null 2>&1; echo $$?)
+	SUSE   = $(shell echo $(DISTRO) | grep -i suse   >/dev/null 2>&1; echo $$?)
+    ifeq ("$(UBUNTU)","0")
+      ifeq ($(ARMv7),1)
+        GLPATH := /usr/arm-linux-gnueabihf/lib
+        GLLINK := -L/usr/arm-linux-gnueabihf/lib
+        ifneq ($(TARGET_FS),) 
+          GLPATH += $(TARGET_FS)/usr/lib/$(UBUNTU_PKG_NAME)
+          GLPATH += $(TARGET_FS)/usr/lib/arm-linux-gnueabihf
+          GLLINK += -L$(TARGET_FS)/usr/lib/$(UBUNTU_PKG_NAME)
+          GLLINK += -L$(TARGET_FS)/usr/lib/arm-linux-gnueabihf
+        endif 
+      else
+        ifeq ($(OS_SIZE),64)
+          GLPATH    ?= /usr/lib/$(UBUNTU_PKG_NAME)
+          GLLINK    ?= -L/usr/lib/$(UBUNTU_PKG_NAME)
+          DFLT_PATH ?= /usr/lib
+        else
+          ifeq ($(i386),1)
+            GLPATH    ?= /usr/lib32/$(UBUNTU_PKG_NAME)
+            GLLINK    ?= -L/usr/lib32/$(UBUNTU_PKG_NAME)
+            DFLT_PATH ?= /usr/lib
+          else
+            GLPATH    ?= /usr/lib/$(UBUNTU_PKG_NAME)
+            GLLINK    ?= -L/usr/lib/$(UBUNTU_PKG_NAME)
+            DFLT_PATH ?= /usr/lib
+          endif
+        endif
+      endif
     endif
-    ifeq ("$(DISTRO)","kubuntu")
-        GLPATH    ?= /usr/lib/nvidia-current
-        GLLINK    ?= -L/usr/lib/nvidia-current
-        DFLT_PATH ?= /usr/lib
-    endif
-    ifeq ("$(DISTRO)","debian")
-        GLPATH    ?= /usr/lib/nvidia-current
-        GLLINK    ?= -L/usr/lib/nvidia-current
-        DFLT_PATH ?= /usr/lib
-    endif
-    ifeq ("$(DISTRO)","suse")
+    ifeq ("$(SUSE)","0")
       ifeq ($(OS_SIZE),64)
-        GLPATH    ?= /usr/X11R6/lib64 /usr/X11R6/lib
-        GLLINK    ?= -L/usr/X11R6/lib64 -L/usr/X11R6/lib
+        GLPATH    ?= /usr/X11R6/lib64
+        GLLINK    ?= -L/usr/X11R6/lib64
         DFLT_PATH ?= /usr/lib64
       else
         GLPATH    ?= /usr/X11R6/lib
@@ -91,93 +99,40 @@ ifeq ("$(OSUPPER)","LINUX")
         DFLT_PATH ?= /usr/lib
       endif
     endif
-    ifeq ("$(DISTRO)","suse linux")
-      ifeq ($(OS_SIZE),64)
-        GLPATH    ?= /usr/X11R6/lib64 /usr/X11R6/lib
-        GLLINK    ?= -L/usr/X11R6/lib64 -L/usr/X11R6/lib
-        DFLT_PATH ?= /usr/lib64
-      else
-        GLPATH    ?= /usr/X11R6/lib
-        GLLINK    ?= -L/usr/X11R6/lib
-        DFLT_PATH ?= /usr/lib
-      endif
-    endif
-    ifeq ("$(DISTRO)","opensuse")
-      ifeq ($(OS_SIZE),64)
-        GLPATH    ?= /usr/X11R6/lib64 /usr/X11R6/lib
-        GLLINK    ?= -L/usr/X11R6/lib64 -L/usr/X11R6/lib
-        DFLT_PATH ?= /usr/lib64
-      else
-        GLPATH    ?= /usr/X11R6/lib
-        GLLINK    ?= -L/usr/X11R6/lib
-        DFLT_PATH ?= /usr/lib
-      endif
-    endif
-    ifeq ("$(DISTRO)","fedora")
+    ifeq ("$(FEDORA)","0")
       ifeq ($(OS_SIZE),64)
         GLPATH    ?= /usr/lib64/nvidia
         GLLINK    ?= -L/usr/lib64/nvidia
         DFLT_PATH ?= /usr/lib64
       else
-        GLPATH    ?=
-        GLLINK    ?=
+        GLPATH    ?= /usr/lib/nvidia
+        GLLINK    ?= -L/usr/lib/nvidia
         DFLT_PATH ?= /usr/lib
       endif
     endif
-    ifeq ("$(DISTRO)","redhat")
+    ifeq ("$(RHEL)","0")
       ifeq ($(OS_SIZE),64)
         GLPATH    ?= /usr/lib64/nvidia
         GLLINK    ?= -L/usr/lib64/nvidia
         DFLT_PATH ?= /usr/lib64
       else
-        GLPATH    ?=
-        GLLINK    ?=
+        GLPATH    ?= /usr/lib/nvidia
+        GLLINK    ?= -L/usr/lib/nvidia
         DFLT_PATH ?= /usr/lib
       endif
     endif
-    ifeq ("$(DISTRO)","red")
+    ifeq ("$(CENTOS)","0")
       ifeq ($(OS_SIZE),64)
         GLPATH    ?= /usr/lib64/nvidia
         GLLINK    ?= -L/usr/lib64/nvidia
         DFLT_PATH ?= /usr/lib64
       else
-        GLPATH    ?=
-        GLLINK    ?=
+        GLPATH    ?= /usr/lib/nvidia
+        GLLINK    ?= -L/usr/lib/nvidia
         DFLT_PATH ?= /usr/lib
       endif
     endif
-    ifeq ("$(DISTRO)","redhatenterpriseworkstation")
-      ifeq ($(OS_SIZE),64)
-        GLPATH    ?= /usr/lib64/nvidia
-        GLLINK    ?= -L/usr/lib64/nvidia
-        DFLT_PATH ?= /usr/lib64
-      else
-        GLPATH    ?=
-        GLLINK    ?=
-        DFLT_PATH ?= /usr/lib
-      endif
-    endif
-    ifeq ("$(DISTRO)","centos")
-      ifeq ($(OS_SIZE),64)
-        GLPATH    ?= /usr/lib64/nvidia
-        GLLINK    ?= -L/usr/lib64/nvidia
-        DFLT_PATH ?= /usr/lib64
-      else
-        GLPATH    ?=
-        GLLINK    ?=
-        DFLT_PATH ?= /usr/lib
-      endif
-    endif
- 
-    ifeq ($(ARMv7),1)
-      ifneq ($(TARGET_FS),) 
-        GLPATH ?= $(TARGET_FS)/usr/lib/nvidia-current $(TARGET_FS)/usr/lib/arm-linux-gnueabihf
-        GLLINK ?= -L$(TARGET_FS)/usr/lib/nvidia-current -L$(TARGET_FS)/usr/lib/arm-linux-gnueabihf
-      endif 
-      GLPATH += /usr/arm-linux-gnueabihf/lib
-      GLLINK += -L/usr/arm-linux-gnueabihf/lib
-    endif
-
+  
   # find libGL, libGLU, libXi, 
   GLLIB  := $(shell find $(GLPATH) $(DFLT_PATH) -name libGL.so  -print 2>/dev/null)
   GLULIB := $(shell find $(GLPATH) $(DFLT_PATH) -name libGLU.so -print 2>/dev/null)
@@ -185,24 +140,43 @@ ifeq ("$(OSUPPER)","LINUX")
   XILIB  := $(shell find $(GLPATH) $(DFLT_PATH) -name libXi.so  -print 2>/dev/null)
   XMULIB := $(shell find $(GLPATH) $(DFLT_PATH) -name libXmu.so -print 2>/dev/null)
 
-  ifeq ("$(GLLIB)",'')
+  ifeq ("$(GLLIB)","")
       $(info >>> WARNING - libGL.so not found, refer to CUDA Samples release notes for how to find and install them. <<<)
       EXEC=@echo "[@]"
   endif
-  ifeq ("$(GLULIB)",'')
+  ifeq ("$(GLULIB)","")
       $(info >>> WARNING - libGLU.so not found, refer to CUDA Samples release notes for how to find and install them. <<<)
       EXEC=@echo "[@]"
   endif
-  ifeq ("$(X11LIB)",'')
+  ifeq ("$(X11LIB)","")
       $(info >>> WARNING - libX11.so not found, refer to CUDA Samples release notes for how to find and install them. <<<)
       EXEC=@echo "[@]"
   endif
-  ifeq ("$(XILIB)",'')
+  ifeq ("$(XILIB)","")
       $(info >>> WARNING - libXi.so not found, refer to CUDA Samples release notes for how to find and install them. <<<)
       EXEC=@echo "[@]"
   endif
-  ifeq ("$(XMULIB)",'')
+  ifeq ("$(XMULIB)","")
       $(info >>> WARNING - libXmu.so not found, refer to CUDA Samples release notes for how to find and install them. <<<)
+      EXEC=@echo "[@]"
+  endif
+
+  HEADER_SEARCH_PATH ?= /usr/include
+
+  GLHEADER  := $(shell find $(HEADER_SEARCH_PATH) -name gl.h -print 2>/dev/null)
+  GLUHEADER := $(shell find $(HEADER_SEARCH_PATH) -name glu.h -print 2>/dev/null)
+  X11HEADER := $(shell find $(HEADER_SEARCH_PATH) -name Xlib.h -print 2>/dev/null)
+
+  ifeq ("$(GLHEADER)","")
+      $(info >>> WARNING - gl.h not found, refer to CUDA Samples release notes for how to find and install them. <<<)
+      EXEC=@echo "[@]"
+  endif
+  ifeq ("$(GLUHEADER)","")
+      $(info >>> WARNING - glu.h not found, refer to CUDA Samples release notes for how to find and install them. <<<)
+      EXEC=@echo "[@]"
+  endif
+  ifeq ("$(X11HEADER)","")
+      $(info >>> WARNING - Xlib.h not found, refer to CUDA Samples release notes for how to find and install them. <<<)
       EXEC=@echo "[@]"
   endif
 else

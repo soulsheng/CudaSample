@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// Copyright 1993-2013 NVIDIA Corporation.  All rights reserved.
+// Copyright 1993-2014 NVIDIA Corporation.  All rights reserved.
 //
 // Please refer to the NVIDIA end user license agreement (EULA) associated
 // with this source code for terms and conditions that govern your use of
@@ -317,12 +317,20 @@ d_boxfilter_rgba_y(unsigned int *id, unsigned int *od, int w, int h, int r)
 }
 
 extern "C"
-void initTexture(int width, int height, void *pImage)
+void initTexture(int width, int height, void *pImage, bool useRGBA)
 {
-    int size = width * height * sizeof(unsigned int);
+    int size = width * height * (useRGBA ? sizeof(uchar4) : sizeof(float));
 
     // copy image data to array
-    cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc(8, 8, 8, 8, cudaChannelFormatKindUnsigned);
+    cudaChannelFormatDesc channelDesc;
+    if (useRGBA)
+    {
+        channelDesc = cudaCreateChannelDesc(8, 8, 8, 8, cudaChannelFormatKindUnsigned);
+    }
+    else
+    {
+        channelDesc = cudaCreateChannelDesc(32, 0, 0, 0, cudaChannelFormatKindFloat);
+    }
     checkCudaErrors(cudaMallocArray(&d_array, &channelDesc, width, height));
     checkCudaErrors(cudaMemcpyToArray(d_array, 0, 0, pImage, size, cudaMemcpyHostToDevice));
 
@@ -335,7 +343,14 @@ void initTexture(int width, int height, void *pImage)
     tex.normalized = true;
 
     // Bind the array to the texture
-    checkCudaErrors(cudaBindTextureToArray(tex, d_array, channelDesc));
+    if (useRGBA)
+    {
+        checkCudaErrors(cudaBindTextureToArray(rgbaTex, d_array, channelDesc));
+    }
+    else
+    {
+        checkCudaErrors(cudaBindTextureToArray(tex, d_array, channelDesc));
+    }
 }
 
 extern "C"

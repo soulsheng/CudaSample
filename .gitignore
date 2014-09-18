@@ -451,3 +451,4 @@
 /NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannel/Release
 /NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannel/*.user
 /NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannel/*.pdb
+/NVIDIA_CUDA-5.0_Samples/3_Imaging/boxFilter/*.suo
