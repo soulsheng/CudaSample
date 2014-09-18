@@ -133,27 +133,30 @@ GENCODE_FLAGS   := $(GENCODE_SM10) $(GENCODE_SM20) $(GENCODE_SM30)
 # Target rules
 all: build
 
-build: boxFilter
+build: DarkChannel
 
-boxFilter_kernel.o: boxFilter_kernel.cu
+DarkChannel.o: DarkChannel.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
-boxFilter_cpu.o: boxFilter_cpu.cpp
+DarkChannel_cpu.o: DarkChannel.cpp
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
-boxFilter.o: boxFilter.cpp
+bmpHandler.o: bmpHandler.cpp
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
-boxFilter: boxFilter.o boxFilter_cpu.o boxFilter_kernel.o
+main.o: main.cpp
+	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
+
+DarkChannel: DarkChannel.o DarkChannel_cpu.o bmpHandler.o main.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p ../../bin/$(OS_ARCH)/$(OSLOWER)/$(TARGET)$(if $(abi),/$(abi))
 	$(EXEC) cp $@ ../../bin/$(OS_ARCH)/$(OSLOWER)/$(TARGET)$(if $(abi),/$(abi))
 
 run: build
-	$(EXEC) ./boxFilter
+	$(EXEC) ./DarkChannel
 
 clean:
-	$(EXEC) rm -f boxFilter.o boxFilter_kernel.o boxFilter_cpu.o boxFilter
-	$(EXEC) rm -rf ../../bin/$(OS_ARCH)/$(OSLOWER)/$(TARGET)$(if $(abi),/$(abi))/boxFilter
+	$(EXEC) rm -f DarkChannel.o DarkChannel_cpu.o bmpHandler.o main.o DarkChannel
+	$(EXEC) rm -rf ../../bin/$(OS_ARCH)/$(OSLOWER)/$(TARGET)$(if $(abi),/$(abi))/DarkChannel
 
 clobber: clean
