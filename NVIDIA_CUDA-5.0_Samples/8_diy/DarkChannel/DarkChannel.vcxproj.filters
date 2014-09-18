@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="utility">
+      <UniqueIdentifier>{5389756e-8cf2-439c-90c9-34a198a47997}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="bmpHandler.cpp">
+      <Filter>utility</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="DarkChannel.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="bmpHandler.h">
+      <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="commonDefinition.h">
+      <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="DarkChannel.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DarkChannel.cuh" />
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="DarkChannel.cu" />
+  </ItemGroup>
+</Project>

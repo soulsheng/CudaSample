@@ -426,3 +426,5 @@
 /NVIDIA_CUDA-5.0_Samples/5_Simulations/smokeParticles/*.o
 /NVIDIA_CUDA-5.0_Samples/8_diy/matrixInv/*.user
 /NVIDIA_CUDA-5.0_Samples/3_Imaging/boxFilter/*.ppm
+/NVIDIA_CUDA-5.0_Samples/0_Simple/template_runtime/*.out
+/NVIDIA_CUDA-5.0_Samples/0_Simple/template_runtime/*.exe
