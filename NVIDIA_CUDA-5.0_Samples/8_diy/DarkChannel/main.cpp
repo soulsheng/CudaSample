@@ -120,6 +120,8 @@ int main()
 	cudaFree( d_RGBA_In );
 	cudaFree( d_RGBA_Out );
 #endif
+	
+	cudaDeviceReset();
 
 	return 0;
 }
