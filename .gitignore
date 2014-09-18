@@ -455,3 +455,8 @@
 /NVIDIA_CUDA-5.0_Samples/0_Simple/matrixMul/Win32
 /NVIDIA_CUDA-5.0_Samples/0_Simple/matrixMulCUBLAS/Win32
 /NVIDIA_CUDA-5.0_Samples/3_Imaging/boxFilter/*.opensdf
+/NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannel/Debug
+/NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannel/ipch
+/NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannel/*.sdf
+/NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannel/*.opensdf
+/NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannel/*.suo

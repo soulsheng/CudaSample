@@ -109,7 +109,7 @@ void BMPHandler::readImageData(char* filename, T *B, T *G, T *R, T *B_P, T *G_P,
 	if(fp == NULL)
 	{
 		printf("Cann't open the file!\n");
-		exit(0);
+		return;//exit(0);
 	}
 	
 	fseek(fp, 0, 0);
@@ -130,7 +130,7 @@ void BMPHandler::readImageData(char* filename, T *B, T *G, T *R, T *B_P, T *G_P,
 	fseek(fp,offset,SEEK_SET);
 	
 	//Assign addresses
-	Pixel =(byte *)malloc((size-offset)*sizeof(byte));
+	Pixel = new byte[size-offset];
 	
 	
 	i=0;
@@ -167,7 +167,7 @@ void BMPHandler::readImageData(char* filename, T *B, T *G, T *R, T *B_P, T *G_P,
 		t=t+1;
 	}
 
-	free(Pixel);
+	delete[] Pixel;
 }
 
 template <typename T>
@@ -190,7 +190,7 @@ void BMPHandler::readImageData(char* filename, T *B, T *G, T *R, T **B_P, T **G_
 	if(fp == NULL)
 	{
 		printf("Cann't open the file!\n");
-		exit(0);
+		return;//exit(0);
 	}
 
 	fseek(fp, 0, 0);
@@ -211,7 +211,7 @@ void BMPHandler::readImageData(char* filename, T *B, T *G, T *R, T **B_P, T **G_
 	fseek(fp,offset,SEEK_SET);
 
 	//Assign addresses
-	Pixel =(byte *)malloc((size-offset)*sizeof(byte));
+	Pixel = new byte[size-offset];
 
 	i=0;
 
@@ -243,7 +243,7 @@ void BMPHandler::readImageData(char* filename, T *B, T *G, T *R, T **B_P, T **G_
 		t=t+1;
 	}
 
-	free(Pixel); Pixel = NULL;
+	delete[] Pixel;
 }
 
 
@@ -267,7 +267,7 @@ void BMPHandler::readImageData(char* filename, T *B_P, T *G_P, T *R_P)
 	if(fp == NULL)
 	{
 		printf("Cann't open the file!\n");
-		exit(0);
+		return;//exit(0);
 	}
 
 	fseek(fp, 0, 0);
@@ -288,13 +288,13 @@ void BMPHandler::readImageData(char* filename, T *B_P, T *G_P, T *R_P)
 	fseek(fp,offset,SEEK_SET);
 
 	//Assign addresses
-	Pixel =(byte *)malloc((size-offset)*sizeof(byte));
+	Pixel = new byte[size-offset];
 
 	i=0;
 
-	byte* B=(byte *)malloc(height*width*sizeof(float));
-	byte* G=(byte *)malloc(height*width*sizeof(float));
-	byte* R=(byte *)malloc(height*width*sizeof(float));
+	byte* B=new byte[height*width];
+	byte* G=new byte[height*width];
+	byte* R=new byte[height*width];
 
 	while(1)
 	{
@@ -324,8 +324,8 @@ void BMPHandler::readImageData(char* filename, T *B_P, T *G_P, T *R_P)
 		t=t+1;
 	}
 
-	free(Pixel); Pixel = NULL;
-	free( B ); free( G ); free( R );
+	delete[] Pixel;
+	delete[] B; delete[] G; delete[] R;
 }
 
 template <typename T>
@@ -334,18 +334,18 @@ void BMPHandler::saveImage( char* filename,
 {
 	
 	T *B_P,*G_P,*R_P;	//	»º´æ
-	B_P=(T *)malloc(height*width*sizeof(T));
-	G_P=(T *)malloc(height*width*sizeof(T));
-	R_P=(T *)malloc(height*width*sizeof(T));
+	B_P=new T[height*width];
+	G_P=new T[height*width];
+	R_P=new T[height*width];
 
 	FILE* fp=fopen( filename,"wb");
 	if(fp == NULL)
 	{
 		printf("Cann't open the file in save!\n");
 
-		free(B_P);
-		free(G_P);
-		free(R_P);
+		delete[] (B_P);
+		delete[] (G_P);
+		delete[] (R_P);
 
 		return;
 	}
@@ -374,9 +374,9 @@ void BMPHandler::saveImage( char* filename,
 
 	fclose(fp);
 
-	free(B_P);
-	free(G_P);
-	free(R_P);
+	delete[] (B_P);
+	delete[] (G_P);
+	delete[] (R_P);
 }
 
 template <typename T>
@@ -385,14 +385,14 @@ void BMPHandler::saveImage( char* filename,
 	int height, int width )
 {
 	T **B_P,**G_P,**R_P;	//	»º´æ
-	B_P=(T **)malloc(height*sizeof(T*));
-	G_P=(T **)malloc(height*sizeof(T*));
-	R_P=(T **)malloc(height*sizeof(T*));
+	B_P=new T*[height*width];
+	G_P=new T*[height*width];
+	R_P=new T*[height*width];
 	for (int i=0;i<height;i++)
 	{
-		B_P[i]=(T *)malloc(width*sizeof(T));
-		G_P[i]=(T *)malloc(width*sizeof(T));
-		R_P[i]=(T *)malloc(width*sizeof(T));
+		B_P[i]=new T[width];
+		G_P[i]=new T[width];
+		R_P[i]=new T[width];
 	}
 
 	FILE* fp=fopen( filename,"wb");
@@ -402,11 +402,11 @@ void BMPHandler::saveImage( char* filename,
 
 		for (int i=0;i<height;i++)
 		{
-			free( B_P[i] );
-			free( G_P[i] );
-			free( R_P[i] );
+			delete[] ( B_P[i] );
+			delete[] ( G_P[i] );
+			delete[] ( R_P[i] );
 		}
-		free( B_P ); free( G_P ); free( R_P );
+		delete[] ( B_P ); delete[] ( G_P ); delete[] ( R_P );
 
 		return;
 	}
@@ -440,11 +440,11 @@ void BMPHandler::saveImage( char* filename,
 
 	for (int i=0;i<height;i++)
 	{
-		free( B_P[i] );
-		free( G_P[i] );
-		free( R_P[i] );
+		delete[] ( B_P[i] );
+		delete[] ( G_P[i] );
+		delete[] ( R_P[i] );
 	}
-	free( B_P ); free( G_P ); free( R_P );
+	delete[] ( B_P ); delete[] ( G_P ); delete[] ( R_P );
 }
 
 //»Ò¶È»¯

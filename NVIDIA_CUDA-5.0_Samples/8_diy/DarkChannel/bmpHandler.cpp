@@ -22,7 +22,7 @@ BMPINF BMPHandler::infoHeader;
 		if(fp == NULL)
 		{
 			printf("Cann't open the file!\n");
-			exit(0);
+			return;//exit(0);
 		}
 
 		fread(&fileHeader, sizeof(fileHeader), 1, fp);
@@ -41,7 +41,7 @@ BMPINF BMPHandler::infoHeader;
 		if(fp == NULL)
 		{
 			printf("Cann't open the file!\n");
-			exit(0);
+			return;//exit(0);
 		}
 
 		//BMPFILEHEADER fileHeader;
@@ -75,7 +75,7 @@ BMPINF BMPHandler::infoHeader;
 		if(fp == NULL)
 		{
 			printf("Cann't open the file!\n");
-			exit(0);
+			return;//exit(0);
 		}
 
 		fseek(fp, 0, 0);
