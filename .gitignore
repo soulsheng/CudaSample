@@ -448,3 +448,6 @@
 /NVIDIA_CUDA-5.0_Samples/0_Simple/simpleVoteIntrinsics/*.o
 /NVIDIA_CUDA-5.0_Samples/0_Simple/simpleZeroCopy/*.o
 /NVIDIA_CUDA-5.0_Samples/0_Simple/template_runtime/*.o
+/NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannel/Release
+/NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannel/*.user
+/NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannel/*.pdb
