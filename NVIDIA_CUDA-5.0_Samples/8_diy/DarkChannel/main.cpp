@@ -11,6 +11,7 @@
 //#include "bmpResizerGPU.h"
 
 #include <cuda_runtime.h>
+#include <helper_timer.h>
 
 #include <stdlib.h>
 #include <iostream>
@@ -19,7 +20,7 @@ using namespace std;
 #define USE_GPU	1
 #define	IMAGE_FILE_TEST		"DarkChannel.bmp"
 #define	ENABLE_RESIZE		0
-#define	ENABLE_TIMER	0
+#define	ENABLE_TIMER	1
 
 int main()
 {
@@ -83,10 +84,9 @@ int main()
 #endif
 
 #if ENABLE_TIMER
-	timerCU  timerCPU;
-	//************division
-	
-	timerCPU.start();
+	StopWatchInterface *timer = 0;
+	sdkCreateTimer(&timer);
+	sdkStartTimer(&timer);
 #endif
 
 #if USE_GPU
@@ -97,8 +97,9 @@ int main()
 #endif
 
 #if ENABLE_TIMER
-	timerCPU.stop();
-	cout << "算法总时间" << timerCPU.getTime() << "\n" << endl;
+	sdkStopTimer(&timer);
+	printf("Processing time: %f (ms)\n", sdkGetTimerValue(&timer));
+	sdkDeleteTimer(&timer);
 #endif
 
 #if USE_GPU
