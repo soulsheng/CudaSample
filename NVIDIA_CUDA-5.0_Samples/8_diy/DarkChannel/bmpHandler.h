@@ -9,7 +9,11 @@
 /*WORD:two-byte type*/
 typedef unsigned short WORD;
 /*DWORD:four-byte type*/
+#ifdef Win32
 typedef unsigned long DWORD;
+#else
+typedef unsigned int DWORD;	// sizeof(int)=4, sizeof(long)=8  under linux 64bit
+#endif
 
 /*file head of bitmap*/
 typedef struct BMP_FILE_HEADER
