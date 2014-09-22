@@ -20,7 +20,11 @@
 using namespace std;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
 
 #define		ENABLE_RESIZE		0
-#define		ENABLE_TIMER	0
+#define		ENABLE_TIMER		1
+
+#if ENABLE_TIMER
+#include <helper_timer.h>
+#endif
 
 /*************************************************
   Function: rgbGray
@@ -459,8 +463,10 @@ void DarkChannel(byte* B_In, byte* G_In, byte* R_In,
 	//******************minwC****************************
 
 #if ENABLE_TIMER	
-	timerCU  timerCPU;
-	timerCPU.start();
+	StopWatchInterface *timer = 0;
+	sdkCreateTimer(&timer);
+
+	sdkStartTimer(&timer);
 #endif
 
     float *win_dark = (float *)malloc(height*width*sizeof(float *));
@@ -492,11 +498,12 @@ void DarkChannel(byte* B_In, byte* G_In, byte* R_In,
     }
 
 #if ENABLE_TIMER
-	timerCPU.stop();
-	cout << "minw时间" << timerCPU.getTime() << "\n" << endl;
+	sdkStopTimer(&timer);
+	printf("Processing time minw时间: %f (ms)\n", sdkGetTimerValue(&timer));
 
 	 //***********************winTT**************
-	timerCPU.start();
+	sdkResetTimer(&timer);
+	sdkStartTimer(&timer);
 #endif
 
     float *win_t = (float *)malloc(height*width*sizeof(float *));
@@ -512,13 +519,13 @@ void DarkChannel(byte* B_In, byte* G_In, byte* R_In,
     }
 
 #if ENABLE_TIMER
-	timerCPU.stop();
-	cout << "winTT时间" << timerCPU.getTime() << "\n" << endl;
-
+	sdkStopTimer(&timer);
+	printf("Processing time winTT时间: %f (ms)\n", sdkGetTimerValue(&timer));
 
 	// *****************start********************
 	 //*************************N-boxfilter**********
-	timerCPU.start();
+	sdkResetTimer(&timer);
+	sdkStartTimer(&timer);
 #endif
 
     int   r=20;
@@ -537,11 +544,12 @@ void DarkChannel(byte* B_In, byte* G_In, byte* R_In,
 	boxfilter(ones,N,r,height,width);
 
 #if ENABLE_TIMER
-	timerCPU.stop();
-	cout << "N-boxfilter时间" << timerCPU.getTime() << "\n" << endl;
+	sdkStopTimer(&timer);
+	printf("Processing time N-boxfilter时间: %f (ms)\n", sdkGetTimerValue(&timer));
 
 	//************************mean_I_r -boxfilter****************
-	timerCPU.start();
+	sdkResetTimer(&timer);
+	sdkStartTimer(&timer);
 #endif
 
 	float *mean_I_r=(float *)calloc(width*height,sizeof(float));
@@ -553,11 +561,12 @@ void DarkChannel(byte* B_In, byte* G_In, byte* R_In,
 	boxfilter(B_P,mean_I_b,r,height,width);
 	
 #if ENABLE_TIMER
-	timerCPU.stop();
-	cout << "mean_I_r_g_b-boxfilter时间" << timerCPU.getTime() << "\n" << endl;
-
+	sdkStopTimer(&timer);
+	printf("Processing time mean_I_r_g_b-boxfilter时间: %f (ms)\n", sdkGetTimerValue(&timer));
+	
 	//**********************mean_p=boxfilter*************
-	timerCPU.start();
+	sdkResetTimer(&timer);
+	sdkStartTimer(&timer);
 #endif
 
 	float *mean_p=(float *)calloc(width*height,sizeof(float));
@@ -565,11 +574,12 @@ void DarkChannel(byte* B_In, byte* G_In, byte* R_In,
 	boxfilter(win_t,mean_p,r,height,width);
 
 #if ENABLE_TIMER
-	timerCPU.stop();
-	cout << "mean_p-boxfilter时间" << timerCPU.getTime() << "\n" << endl;
-
+	sdkStopTimer(&timer);
+	printf("Processing time mean_p--boxfilter时间: %f (ms)\n", sdkGetTimerValue(&timer));
+	
 	//**************************mean_Ip_r=boxfilter**************
-	timerCPU.start();
+	sdkResetTimer(&timer);
+	sdkStartTimer(&timer);
 #endif
 
 	float *mean_Ip_r=(float *)calloc(width*height,sizeof(float));
@@ -588,11 +598,12 @@ void DarkChannel(byte* B_In, byte* G_In, byte* R_In,
 	boxfilter(B_Pp,mean_Ip_b,r,height,width);
 
 #if ENABLE_TIMER
-	timerCPU.stop();
-	cout << "mean_Ip_r_g_b-boxfilter时间" << timerCPU.getTime() << "\n" << endl;
-
+	sdkStopTimer(&timer);
+	printf("Processing time mean_Ip_r_g_b-boxfilter时间: %f (ms)\n", sdkGetTimerValue(&timer));
+	
 	//*************************cov_Ip_r*************************
-	timerCPU.start();
+	sdkResetTimer(&timer);
+	sdkStartTimer(&timer);
 #endif
 
 	float *cov_Ip_r=(float *)calloc(width*height,sizeof(float));
@@ -611,11 +622,12 @@ void DarkChannel(byte* B_In, byte* G_In, byte* R_In,
 		}
 
 #if ENABLE_TIMER
-	timerCPU.stop();
-	cout << "cov_Ip_r_g_b-boxfilter时间" << timerCPU.getTime() << "\n" << endl;
-	
+	sdkStopTimer(&timer);
+	printf("Processing time cov_Ip_r_g_b-boxfilter时间: %f (ms)\n", sdkGetTimerValue(&timer));
+		
 	//***********************************var_I**************
-	timerCPU.start();
+	sdkResetTimer(&timer);
+	sdkStartTimer(&timer);
 #endif
 
 	float *var_I_rr=(float *)calloc(width*height,sizeof(float));
@@ -658,11 +670,12 @@ void DarkChannel(byte* B_In, byte* G_In, byte* R_In,
 	
 	
 #if ENABLE_TIMER
-	timerCPU.stop();
-	cout << "var_I-boxfilter时间" << timerCPU.getTime() << "\n" << endl;
-	
+	sdkStopTimer(&timer);
+	printf("Processing time var_I-boxfilter时间: %f (ms)\n", sdkGetTimerValue(&timer));
+		
 	//*********************************ar_g_b*********************
-	timerCPU.start();
+	sdkResetTimer(&timer);
+	sdkStartTimer(&timer);
 #endif
 
 	float *ar=(float *)calloc(width*height,sizeof(float));
@@ -692,10 +705,12 @@ void DarkChannel(byte* B_In, byte* G_In, byte* R_In,
 	
 	
 #if ENABLE_TIMER
-	timerCPU.stop();
-	cout << "ar_g_b时间" << timerCPU.getTime() << "\n" << endl;
+	sdkStopTimer(&timer);
+	printf("Processing time ar_g_b时间: %f (ms)\n", sdkGetTimerValue(&timer));
+	
 	//**********************************q*********************************
-	timerCPU.start();
+	sdkResetTimer(&timer);
+	sdkStartTimer(&timer);
 #endif
 
     float *mean_Ia_r=(float *)calloc(width*height,sizeof(float));
@@ -736,10 +751,12 @@ void DarkChannel(byte* B_In, byte* G_In, byte* R_In,
 	
 
 #if ENABLE_TIMER
-	timerCPU.stop();
-	cout << "q时间" << timerCPU.getTime() << "\n" << endl;
+	sdkStopTimer(&timer);
+	printf("Processing time	q时间: %f (ms)\n", sdkGetTimerValue(&timer));
+
 	//***************************sort****************
-	timerCPU.start();
+	sdkResetTimer(&timer);
+	sdkStartTimer(&timer);
 #endif
    
     
@@ -796,11 +813,12 @@ void DarkChannel(byte* B_In, byte* G_In, byte* R_In,
     }
     
 #if ENABLE_TIMER
-	timerCPU.stop();
-	cout << "sort时间" << timerCPU.getTime() << "\n" << endl;
+	sdkStopTimer(&timer);
+	printf("Processing time sort时间: %f (ms)\n", sdkGetTimerValue(&timer));
 
 	//******************************去雾**********************
-	timerCPU.start();
+	sdkResetTimer(&timer);
+	sdkStartTimer(&timer);
 #endif
 
     float atmo = 0.0;//Atmospheric optical
@@ -916,8 +934,10 @@ void DarkChannel(byte* B_In, byte* G_In, byte* R_In,
 #endif
 
 #if ENABLE_TIMER
-	timerCPU.stop();
-	cout << "去雾时间" << timerCPU.getTime() << "\n" << endl << endl;
+	sdkStopTimer(&timer);
+	printf("Processing time 去雾时间: %f (ms)\n", sdkGetTimerValue(&timer));
+
+	sdkDeleteTimer(&timer);
 #endif
 
 	///***************************Binary image**********************************/

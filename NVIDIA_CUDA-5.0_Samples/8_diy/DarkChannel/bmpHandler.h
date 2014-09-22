@@ -7,38 +7,38 @@
 #pragma pack(2)
 
 /*WORD:two-byte type*/
-typedef unsigned short WORD;
+typedef unsigned short word;
 /*DWORD:four-byte type*/
 #ifdef Win32
-typedef unsigned long DWORD;
+typedef unsigned long dword;
 #else
-typedef unsigned int DWORD;	// sizeof(int)=4, sizeof(long)=8  under linux 64bit
+typedef unsigned int dword;	// sizeof(int)=4, sizeof(long)=8  under linux 64bit
 #endif
 
 /*file head of bitmap*/
 typedef struct BMP_FILE_HEADER
 {
-	WORD bType;             /*  file identifier          */
-	DWORD bSize;            /*  file size                */
-	WORD bReserved1;        /*  retention value,must 0   */       
-	WORD bReserved2;        /*  retention value,must 0   */
-	DWORD bOffset;          /*  The offset from the last file header to the start of image data bits. */
+	word bType;             /*  file identifier          */
+	dword bSize;            /*  file size                */
+	word bReserved1;        /*  retention value,must 0   */       
+	word bReserved2;        /*  retention value,must 0   */
+	dword bOffset;          /*  The offset from the last file header to the start of image data bits. */
 } BMPFILEHEADER;
 
 /*bitmap header*/
 typedef struct BMP_INFO
 {
-	DWORD bInfoSize;       /*  size of the message header */
-	DWORD bWidth;          /*  width of the image         */
-	DWORD bHeight;         /*  height of the image        */
-	WORD bPlanes;          /*  number of bit-plane image  */
-	WORD bBitCount;        /*  number of bits per pixel   */
-	DWORD bCompression;    /*  compression Type           */
-	DWORD bmpImageSize;    /*  image size, in bytes       */
-	DWORD bXPelsPerMeter;  /*  horizontal resolution      */
-	DWORD bYPelsPerMeter;  /*  vertical resolution        */
-	DWORD bClrUsed;        /*  number of colors used      */
-	DWORD bClrImportant;   /*  significant number of colors*/
+	dword bInfoSize;       /*  size of the message header */
+	dword bWidth;          /*  width of the image         */
+	dword bHeight;         /*  height of the image        */
+	word bPlanes;          /*  number of bit-plane image  */
+	word bBitCount;        /*  number of bits per pixel   */
+	dword bCompression;    /*  compression Type           */
+	dword bmpImageSize;    /*  image size, in bytes       */
+	dword bXPelsPerMeter;  /*  horizontal resolution      */
+	dword bYPelsPerMeter;  /*  vertical resolution        */
+	dword bClrUsed;        /*  number of colors used      */
+	dword bClrImportant;   /*  significant number of colors*/
 } BMPINF;
 
 #pragma pack()

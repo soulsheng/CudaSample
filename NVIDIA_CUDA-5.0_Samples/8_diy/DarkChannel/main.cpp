@@ -17,7 +17,7 @@
 #include <iostream>
 using namespace std;
 
-#define USE_GPU	1
+#define USE_GPU	0
 #define	IMAGE_FILE_TEST		"DarkChannel.bmp"
 #define	ENABLE_RESIZE		0
 #define	ENABLE_TIMER	1
@@ -98,7 +98,7 @@ int main()
 
 #if ENABLE_TIMER
 	sdkStopTimer(&timer);
-	printf("Processing time: %f (ms)\n", sdkGetTimerValue(&timer));
+	printf("Processing time ALL: %f (ms)\n", sdkGetTimerValue(&timer));
 	sdkDeleteTimer(&timer);
 #endif
 
