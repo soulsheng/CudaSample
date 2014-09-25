@@ -17,7 +17,7 @@
 #include <iostream>
 using namespace std;
 
-#define USE_GPU	0
+#define USE_GPU	1
 #define	IMAGE_FILE_TEST		"DarkChannel.bmp"
 #define	ENABLE_RESIZE		0
 #define	ENABLE_TIMER	1
