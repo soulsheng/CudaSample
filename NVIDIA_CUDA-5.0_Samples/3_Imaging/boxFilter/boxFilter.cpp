@@ -176,7 +176,8 @@ void display()
         // load texture from pbo
         glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, pbo);
         glBindTexture(GL_TEXTURE_2D, texid);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+        //glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
         glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
 
         // fragment program is required to display floating point texture
