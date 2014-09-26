@@ -3,6 +3,10 @@
 #include <cuda_runtime.h>
 
 #define		BLOCK_SIZE_1D	64	// BLOCK_SIZE = BLOCK_SIZE_1D
+#define		USE_TEXTURE		0
+#define		USE_SDK			0
+
+#if !USE_SDK
 
 __global__ void scan_kernel( float *imDst_C,float * imSrc_C, int nElement, int nBlockStride, int nThreadStride )
 {
@@ -71,7 +75,7 @@ __global__ void delta( float *imDst_C,float *imCum_C,int r, int nElement, int nB
 %   - Running time independent of r; 
 %   - Equivalent to the function: colfilt(imSrc, [2*r+1, 2*r+1], 'sliding', @sum);
 %   - But much faster.*/
-void boxfilter0(float *imSrc,float *imCum_C,float *imDst,int r,int height,int width)
+void boxfilter(float *imSrc,float *imCum_C,float *imDst,int r,int height,int width)
 {
 	
 	int nBlockSize;
@@ -91,7 +95,47 @@ void boxfilter0(float *imSrc,float *imCum_C,float *imDst,int r,int height,int wi
 	delta<<<height,nBlockSize>>>( imDst,imCum_C,r, width, width, 1 ); // 水平X方向等距离相减
 }
 
+void initTexture(int width, int height){}
 
+void freeTextures(){}
+
+#else
+
+#if USE_TEXTURE
+texture<float, 2> tex;
+cudaArray *d_array;
+
+void initTexture(int width, int height)
+{
+    int size = width * height * sizeof(float);
+
+    // copy image data to array
+    cudaChannelFormatDesc channelDesc;
+	channelDesc = cudaCreateChannelDesc(32, 0, 0, 0, cudaChannelFormatKindFloat);
+    
+    cudaMallocArray(&d_array, &channelDesc, width, height);
+    //cudaMemcpyToArray(d_array, 0, 0, pImage, size, cudaMemcpyHostToDevice);
+
+    // set texture parameters
+    tex.addressMode[0] = cudaAddressModeClamp;
+    tex.addressMode[1] = cudaAddressModeClamp;
+    tex.filterMode = cudaFilterModePoint;
+    tex.normalized = true;
+
+    // Bind the array to the texture
+   cudaBindTextureToArray(tex, d_array, channelDesc);
+}
+
+void freeTextures()
+{
+    cudaFreeArray(d_array);
+}
+
+#else
+void initTexture(int width, int height){}
+
+void freeTextures(){}
+#endif
 
 // process row
 __device__ void
@@ -189,7 +233,7 @@ d_boxfilter_y_global(float *id, float *od, int w, int h, int r)
     d_boxfilter_y(&id[x], &od[x], w, h, r);
 }
 
-#if 0
+#if USE_TEXTURE
 // texture version
 // texture fetches automatically clamp to edge of image
 __global__ void
@@ -241,7 +285,19 @@ d_boxfilter_y_tex(float *od, int w, int h, int r)
 
 void boxfilter(float *imSrc,float *imCum_C,float *imDst,int r,int height,int width)
 {
+#if USE_TEXTURE
+	cudaMemcpyToArray(d_array, 0, 0, imSrc, height*width*sizeof(float), cudaMemcpyDeviceToDevice);
+
+    cudaBindTextureToArray(tex, d_array);
+
+	d_boxfilter_x_tex<<< height / BLOCK_SIZE_1D, BLOCK_SIZE_1D, 0 >>>(imCum_C, width, height, r);
+#else
+
 	d_boxfilter_x_global<<< height / BLOCK_SIZE_1D, BLOCK_SIZE_1D, 0 >>>(imSrc, imCum_C, width, height, r);
+
+#endif
 	d_boxfilter_y_global<<< width / BLOCK_SIZE_1D, BLOCK_SIZE_1D, 0 >>>(imCum_C, imDst, width, height, r);
 
 }
+
+#endif
