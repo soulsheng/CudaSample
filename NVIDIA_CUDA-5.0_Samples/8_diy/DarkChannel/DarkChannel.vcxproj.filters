@@ -23,8 +23,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="DarkChannel.cuh" />
+    <None Include="boxFilter.cuh" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="DarkChannel.cu" />
+    <CudaCompile Include="boxFilter.cu" />
   </ItemGroup>
 </Project>

@@ -21,7 +21,9 @@
     <ClInclude Include="commonDefinition.h" />
   </ItemGroup>
   <ItemGroup>
+    <CudaCompile Include="boxFilter.cu" />
     <CudaCompile Include="DarkChannel.cu" />
+    <None Include="boxFilter.cuh" />
     <None Include="DarkChannel.cuh" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
