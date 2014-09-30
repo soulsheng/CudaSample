@@ -3,8 +3,8 @@
 #include <cuda_runtime.h>
 
 #define		BLOCK_SIZE_1D	64	// BLOCK_SIZE = BLOCK_SIZE_1D
-#define		USE_TEXTURE		0
-#define		USE_SDK			0
+#define		USE_TEXTURE		1
+#define		USE_SDK			1
 
 #if !USE_SDK
 
@@ -241,7 +241,8 @@ d_boxfilter_x_tex(float *od, int w, int h, int r)
 {
     float scale = 1.0f / (float)((r << 1) + 1);
     unsigned int y = blockIdx.x*blockDim.x + threadIdx.x;
-
+	if (y < h)
+    {
     float t = 0.0f;
 
     for (int x =- r; x <= r; x++)
@@ -257,6 +258,7 @@ d_boxfilter_x_tex(float *od, int w, int h, int r)
         t -= tex2D(tex, x - r - 1, y);
         od[y * w + x] = t * scale;
     }
+	}
 }
 
 __global__ void
@@ -290,13 +292,13 @@ void boxfilter(float *imSrc,float *imCum_C,float *imDst,int r,int height,int wid
 
     cudaBindTextureToArray(tex, d_array);
 
-	d_boxfilter_x_tex<<< height / BLOCK_SIZE_1D, BLOCK_SIZE_1D, 0 >>>(imCum_C, width, height, r);
+	d_boxfilter_x_tex<<< (height+BLOCK_SIZE_1D-1) / BLOCK_SIZE_1D, BLOCK_SIZE_1D, 0 >>>(imCum_C, width, height, r);
 #else
 
 	d_boxfilter_x_global<<< height / BLOCK_SIZE_1D, BLOCK_SIZE_1D, 0 >>>(imSrc, imCum_C, width, height, r);
 
 #endif
-	d_boxfilter_y_global<<< width / BLOCK_SIZE_1D, BLOCK_SIZE_1D, 0 >>>(imCum_C, imDst, width, height, r);
+	d_boxfilter_y_global<<< (width+BLOCK_SIZE_1D-1) / BLOCK_SIZE_1D, BLOCK_SIZE_1D, 0 >>>(imCum_C, imDst, width, height, r);
 
 }
 

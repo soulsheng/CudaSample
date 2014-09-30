@@ -794,12 +794,12 @@ void DarkChannelGPU::initialize()
 	cudaMalloc((void**)&d_G_Out_byte, nBufferSizeByte );
 	cudaMalloc((void**)&d_B_Out_byte, nBufferSizeByte );
 
+    initTexture(width, height);
+
 }
 
 void DarkChannelGPU::release()
 {
-    initTexture(width, height);
-
 
 	cudaFree(d_R_In);	cudaFree(d_G_In);	cudaFree(d_B_In);
 	cudaFree(d_R_In_original);	cudaFree(d_G_In_original);	cudaFree(d_B_In_original);
@@ -824,6 +824,6 @@ void DarkChannelGPU::release()
 	cudaFree(d_R_In_byte);	cudaFree(d_G_In_byte);	cudaFree(d_B_In_byte);
 	cudaFree(d_R_Out_byte);	cudaFree(d_G_Out_byte);	cudaFree(d_B_Out_byte);
 
-    freeTextures();
+    //freeTextures();
 
 }
