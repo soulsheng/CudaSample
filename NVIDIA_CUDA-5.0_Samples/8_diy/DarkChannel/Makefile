@@ -164,6 +164,9 @@ build: DarkChannel
 
 DarkChannel.o: DarkChannel.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
+	
+boxFilter.o: boxFilter.cu
+	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
 DarkChannel_cpu.o: DarkChannel.cpp
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
@@ -174,7 +177,7 @@ bmpHandler.o: bmpHandler.cpp
 main.o: main.cpp
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
-DarkChannel: DarkChannel.o DarkChannel_cpu.o bmpHandler.o main.o
+DarkChannel: DarkChannel.o DarkChannel_cpu.o bmpHandler.o main.o boxFilter.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p bin/$(OS_ARCH)/$(OSLOWER)/$(TARGET)$(if $(abi),/$(abi))
 	$(EXEC) cp $@ bin/$(OS_ARCH)/$(OSLOWER)/$(TARGET)$(if $(abi),/$(abi))
