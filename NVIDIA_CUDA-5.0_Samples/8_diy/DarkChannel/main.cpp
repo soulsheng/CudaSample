@@ -11,7 +11,7 @@
 //#include "bmpResizerGPU.h"
 
 #include <cuda_runtime.h>
-#include <helper_timer.h>
+#include "helper_timer.h"
 
 #include <stdlib.h>
 #include <iostream>

@@ -11,7 +11,7 @@
 //#include "bmpResizerGPU.h"
 
 //#include <cuda_runtime.h>
-//#include <helper_timer.h>
+#include "helper_timer.h"
 
 #include <stdlib.h>
 #include <iostream>
@@ -20,7 +20,7 @@ using namespace std;
 #define USE_GPU	0
 #define	IMAGE_FILE_TEST		"DarkChannel.bmp"
 #define	ENABLE_RESIZE		0
-#define	ENABLE_TIMER	0
+#define	ENABLE_TIMER	1
 
 int main()
 {
