@@ -1,7 +1,7 @@
 
 
-//#include "DarkChannel.h"
-#include "DarkChannel.cuh"
+#include "DarkChannel.h"
+//#include "DarkChannel.cuh"
 //#include "warmupCUDA.cuh"
 
 //#include "timerCU.h"
@@ -10,17 +10,17 @@
 //#include "bmpResizer.h"
 //#include "bmpResizerGPU.h"
 
-#include <cuda_runtime.h>
-#include <helper_timer.h>
+//#include <cuda_runtime.h>
+//#include <helper_timer.h>
 
 #include <stdlib.h>
 #include <iostream>
 using namespace std;
 
-#define USE_GPU	1
+#define USE_GPU	0
 #define	IMAGE_FILE_TEST		"DarkChannel.bmp"
 #define	ENABLE_RESIZE		0
-#define	ENABLE_TIMER	1
+#define	ENABLE_TIMER	0
 
 int main()
 {
@@ -120,9 +120,9 @@ int main()
 #if USE_GPU
 	cudaFree( d_RGBA_In );
 	cudaFree( d_RGBA_Out );
+	cudaDeviceReset();
 #endif
 	
-	cudaDeviceReset();
 
 	return 0;
 }

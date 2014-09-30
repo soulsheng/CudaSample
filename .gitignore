@@ -463,3 +463,7 @@
 /NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannel/doc/*.png
 /NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannel/*.bmp
 /NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannel/doc/*.jpg
+/nvidia_cuda-5.0_samples/8_diy/DarkChannelC/ipch
+/nvidia_cuda-5.0_samples/8_diy/DarkChannelC/Release
+/nvidia_cuda-5.0_samples/8_diy/DarkChannelC/Debug
+/nvidia_cuda-5.0_samples/8_diy/DarkChannelC/*.sdf

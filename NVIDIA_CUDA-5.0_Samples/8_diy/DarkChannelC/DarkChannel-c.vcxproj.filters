@@ -10,6 +10,7 @@
       <Filter>utility</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="DarkChannel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bmpHandler.h">
@@ -18,13 +19,6 @@
     <ClInclude Include="commonDefinition.h">
       <Filter>utility</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="DarkChannel.cuh" />
-    <None Include="boxFilter.cuh" />
-  </ItemGroup>
-  <ItemGroup>
-    <CudaCompile Include="DarkChannel.cu" />
-    <CudaCompile Include="boxFilter.cu" />
+    <ClInclude Include="DarkChannel.h" />
   </ItemGroup>
 </Project>
