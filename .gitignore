@@ -473,3 +473,17 @@
 /NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannelC/*.opensdf
 /NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannelC/*.sdf
 /NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannelC/*.suo
+/NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannelCUDA/doc
+/NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannelCUDA/ipch
+/NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannelCUDA/Release
+/NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannelCUDA/*.sdf
+/NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannelCUDA/*.suo
+/NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannelCUDA/*.bmp
+/NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannelCUDA/*.txt
+/NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannelCUDA/*.pdb
+/NVIDIA_CUDA-5.0_Samples/8_diy/driverMinCUDA/Debug
+/NVIDIA_CUDA-5.0_Samples/8_diy/driverMinCUDA/ipch
+/NVIDIA_CUDA-5.0_Samples/8_diy/driverMinCUDA/Release
+/NVIDIA_CUDA-5.0_Samples/8_diy/driverMinCUDA/*.sdf
+/NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannelCUDA/*.opensdf
+/NVIDIA_CUDA-5.0_Samples/8_diy/driverMinCUDA/*.suo
