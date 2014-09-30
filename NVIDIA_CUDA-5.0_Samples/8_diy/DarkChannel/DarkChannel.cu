@@ -24,6 +24,7 @@ using namespace std;
 // 最优配置
 // 对于gt640  BLOCK_SIZE_1D = 64(128,256同), BLOCK_SIZE_2D = (4,32)(45ms pointer), (4,128)(21ms texture)
 // 对于gt480  BLOCK_SIZE_1D = 64(128,256同), BLOCK_SIZE_2D = (4,128)(6.7ms pointer), (8,32)(9.2ms texture)
+// 对于tk1	  BLOCK_SIZE_1D = 64(128,256同), BLOCK_SIZE_2D = (4,32)(75ms pointer), (4,128)(30ms texture) minCUDA 
 // 
 #define		BLOCK_SIZE_1D	64	// BLOCK_SIZE = BLOCK_SIZE_1D
 #define		BLOCK_SIZE_2D_X	4	// BLOCK_SIZE = BLOCK_SIZE_2D_X * BLOCK_SIZE_2D_Y
@@ -32,6 +33,12 @@ using namespace std;
 
 #define		ENABLE_TIMER	0
 
+#define		USE_TEXTURE_ADDRESS	1
+
+#if USE_TEXTURE_ADDRESS
+texture<float, 2, cudaReadModeElementType> tex;
+cudaArray* arr_min_RGB;
+#endif
 
 //矩阵元素除以255 
 __global__ void division(float *d_R_In,float *d_G_In,float *d_B_In,
@@ -293,7 +300,14 @@ __global__ void minwCUDA(float *C_min_RGB,float *C_win_dark,int height,int width
 		}
 		for(int m=indexis;m<=indexie;m++)
 			for(int n=indexjs;n<=indexje;n++)
+#if USE_TEXTURE_ADDRESS
+			{
+				float p = tex2D(tex, n, m);
+				temp = temp< p ?temp:p ;
+			}
+#else
 				temp=temp<C_min_RGB[m*width+n]?temp:C_min_RGB[m*width+n];
+#endif
 
 
 		C_win_dark[i*width+j]=C_win_dark[i*width+j]<temp?C_win_dark[i*width+j]:temp;
@@ -452,6 +466,22 @@ void DarkChannelGPU::Enhance(	byte *d_B_In_byte,	byte *d_G_In_byte,	byte *d_R_In
 		thrust::device_ptr<float>( C_win_dark + width*height ) ,
 		1.0f
 		);
+
+#if USE_TEXTURE_ADDRESS
+	// cuda texture ------------------------------------------------------------------------------------------
+	cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc(32, 0, 0, 0, cudaChannelFormatKindFloat);
+    err = cudaMallocArray(&arr_min_RGB, &channelDesc, width, height);
+    err = cudaMemcpyToArray(arr_min_RGB, 0, 0, C_min_RGB, height*width*sizeof(float), cudaMemcpyDeviceToDevice);
+
+    // set texture parameters
+    tex.addressMode[0] = cudaAddressModeClamp;
+    tex.addressMode[1] = cudaAddressModeClamp;
+    tex.filterMode = cudaFilterModePoint;
+    tex.normalized = false;
+
+    // Bind the array to the texture
+    err = cudaBindTextureToArray(tex, arr_min_RGB, channelDesc);
+#endif
 
 	minwCUDA<<<grid,block>>>(C_min_RGB,C_win_dark,height,width,win_size);
 
@@ -825,5 +855,8 @@ void DarkChannelGPU::release()
 	cudaFree(d_R_Out_byte);	cudaFree(d_G_Out_byte);	cudaFree(d_B_Out_byte);
 
     //freeTextures();
-
+#if USE_TEXTURE_ADDRESS
+	cudaUnbindTexture( tex );
+	//cudaFreeArray( arr_min_RGB );
+#endif
 }
