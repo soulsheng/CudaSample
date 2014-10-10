@@ -1,6 +1,7 @@
 
 #include "resizeNN.cuh"
 #include <cuda_runtime.h>
+#include <stdio.h>
 
 #include "helper_timer.h"
 #define	ENABLE_TIMER		1
