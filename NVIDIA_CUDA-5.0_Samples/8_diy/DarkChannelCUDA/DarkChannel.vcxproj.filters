@@ -18,13 +18,22 @@
     <ClInclude Include="commonDefinition.h">
       <Filter>utility</Filter>
     </ClInclude>
+    <ClInclude Include="helper_timer.h">
+      <Filter>utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="DarkChannel.cuh" />
     <None Include="boxFilter.cuh" />
+    <None Include="resizeNN.cuh">
+      <Filter>utility</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="DarkChannel.cu" />
     <CudaCompile Include="boxFilter.cu" />
+    <CudaCompile Include="resizeNN.cu">
+      <Filter>utility</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>

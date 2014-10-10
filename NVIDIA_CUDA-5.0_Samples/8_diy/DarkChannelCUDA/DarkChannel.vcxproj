@@ -17,12 +17,15 @@
   <ItemGroup>
     <ClInclude Include="bmpHandler.h" />
     <ClInclude Include="commonDefinition.h" />
+    <ClInclude Include="helper_timer.h" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="boxFilter.cu" />
     <CudaCompile Include="DarkChannel.cu" />
+    <CudaCompile Include="resizeNN.cu" />
     <None Include="boxFilter.cuh" />
     <None Include="DarkChannel.cuh" />
+    <None Include="resizeNN.cuh" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{48559C97-1A54-45B0-930D-6B679A647815}</ProjectGuid>

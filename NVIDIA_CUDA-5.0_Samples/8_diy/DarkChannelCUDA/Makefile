@@ -168,13 +168,16 @@ DarkChannel.o: DarkChannel.cu
 boxFilter.o: boxFilter.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
+resizeNN.o: resizeNN.cu
+	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
+
 bmpHandler.o: bmpHandler.cpp
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
 main.o: main.cpp
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
-DarkChannel: DarkChannel.o bmpHandler.o main.o boxFilter.o
+DarkChannel: DarkChannel.o bmpHandler.o main.o boxFilter.o resizeNN.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) -o $@ $+ $(LIBRARIES)
 	$(EXEC) mkdir -p bin/$(OS_ARCH)/$(OSLOWER)/$(TARGET)$(if $(abi),/$(abi))
 	$(EXEC) cp $@ bin/$(OS_ARCH)/$(OSLOWER)/$(TARGET)$(if $(abi),/$(abi))
@@ -183,7 +186,7 @@ run: build
 	$(EXEC) ./DarkChannel
 
 clean:
-	$(EXEC) rm -f DarkChannel.o bmpHandler.o main.o DarkChannel
+	$(EXEC) rm -f DarkChannel.o bmpHandler.o main.o  boxFilter.o resizeNN.o DarkChannel
 	$(EXEC) rm -rf bin/$(OS_ARCH)/$(OSLOWER)/$(TARGET)$(if $(abi),/$(abi))/DarkChannel
 
 clobber: clean

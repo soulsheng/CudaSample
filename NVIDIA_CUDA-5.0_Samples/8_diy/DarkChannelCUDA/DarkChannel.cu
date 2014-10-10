@@ -16,6 +16,7 @@
 //#include "timerCU.h"
 //#include "bmpResizerGPU.h"
 //#include "warmupCUDA.cuh"
+#include "resizeNN.cuh"
 
 #include <iostream>
 using namespace std;
@@ -429,8 +430,7 @@ void DarkChannelGPU::user2Align( byte *B,byte *G,byte *R,unsigned int *RGBA, int
 
 void DarkChannelGPU::Enhance(	byte *d_B_In_byte,	byte *d_G_In_byte,	byte *d_R_In_byte,
 								byte *d_B_In_resized, byte *d_G_In_resized, byte *d_R_In_resized,			
-								byte *d_B_Out,	byte *d_G_Out,	byte *d_R_Out,
-								float scale )
+								byte *d_B_Out,	byte *d_G_Out,	byte *d_R_Out )
 {
 	
 	cudaError_t cudaStatus,err;
@@ -662,8 +662,8 @@ void DarkChannelGPU::Enhance(	byte *d_B_In_byte,	byte *d_G_In_byte,	byte *d_R_In
 	alpha1<<<blocks,sizeBlock1D>>>(C_alpha,C_val1,q,height,width);
 
 	// resize
-	if( scale != 1 )
-		;//BMPResizerGPU::resize( C_alpha, C_alpha_original, height, width, height_original, width_original );
+	if( height != height_original )
+		CUResizeNN::process( C_alpha, C_alpha_original, width, height, width_original, height_original );
 	else
 		cudaMemcpy( C_alpha_original, C_alpha, height * width * sizeof(float), cudaMemcpyDeviceToDevice );
 
@@ -682,22 +682,37 @@ void DarkChannelGPU::Enhance(	byte *d_B_In_byte,	byte *d_G_In_byte,	byte *d_R_In
 }
 
 
-void DarkChannelGPU::Enhance(	unsigned int *d_BGR_In_byte, unsigned int *d_BGR_Out_byte )
+void DarkChannelGPU::Enhance(	unsigned int *d_BGR_In_byte, unsigned int *d_BGR_Out_byte,
+								unsigned int *d_BGR_In_byte_resized /*= NULL*/ )
 {
 	
 	user2Align( d_B_In_byte,	d_G_In_byte,	d_R_In_byte, 
 				d_BGR_In_byte, 
-				width, height, 
+				width_original, height_original, 
 				false );
 
+	if( d_BGR_In_byte_resized )
+	{
+		user2Align( d_B_In_byte_resized,	d_G_In_byte_resized,	d_R_In_byte_resized, 
+				d_BGR_In_byte_resized, 
+				width, height, 
+				false );
+	}
+	else
+	{
+		user2Align( d_B_In_byte_resized,	d_G_In_byte_resized,	d_R_In_byte_resized, 
+				d_BGR_In_byte, 
+				width, height, 
+				false );
+	}
+
 	Enhance( d_B_In_byte, d_G_In_byte, d_R_In_byte,
-			 d_B_In_byte, d_G_In_byte, d_R_In_byte,
-			 d_B_Out_byte,d_G_Out_byte,d_R_Out_byte,
-			 1.0f );
+			 d_B_In_byte_resized, d_G_In_byte_resized, d_R_In_byte_resized,
+			 d_B_Out_byte,d_G_Out_byte,d_R_Out_byte );
 
 	user2Align( d_B_Out_byte,	d_G_Out_byte,	d_R_Out_byte, 
 				d_BGR_Out_byte, 
-				width, height, 
+				width_original, height_original, 
 				true );
 }
 
@@ -824,6 +839,10 @@ void DarkChannelGPU::initialize()
 	cudaMalloc((void**)&d_G_Out_byte, nBufferSizeByte );
 	cudaMalloc((void**)&d_B_Out_byte, nBufferSizeByte );
 
+	cudaMalloc((void**)&d_R_In_byte_resized, nBufferSizeByte );
+	cudaMalloc((void**)&d_G_In_byte_resized, nBufferSizeByte );
+	cudaMalloc((void**)&d_B_In_byte_resized, nBufferSizeByte );
+
     initTexture(width, height);
 
 }
@@ -853,6 +872,7 @@ void DarkChannelGPU::release()
 
 	cudaFree(d_R_In_byte);	cudaFree(d_G_In_byte);	cudaFree(d_B_In_byte);
 	cudaFree(d_R_Out_byte);	cudaFree(d_G_Out_byte);	cudaFree(d_B_Out_byte);
+	cudaFree(d_R_In_byte_resized);	cudaFree(d_G_In_byte_resized);	cudaFree(d_B_In_byte_resized);
 
     //freeTextures();
 #if USE_TEXTURE_ADDRESS

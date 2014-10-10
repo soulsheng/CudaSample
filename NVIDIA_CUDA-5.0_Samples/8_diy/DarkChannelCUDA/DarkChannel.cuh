@@ -32,10 +32,10 @@ public:
 	*/ 
 	void Enhance(	byte *d_B_In_byte,	byte *d_G_In_byte,	byte *d_R_In_byte,			
 					byte *d_B_In_resized, byte *d_G_In_resized, byte *d_R_In_resized,			
-					byte *d_B_Out,	byte *d_G_Out,	byte *d_R_Out,
-					float scale = 1.0f );
+					byte *d_B_Out,	byte *d_G_Out,	byte *d_R_Out );
 
-	void Enhance(	unsigned int *d_BGR_In_byte, unsigned int *d_BGR_Out_byte );
+	void Enhance(	unsigned int *d_BGR_In_byte, unsigned int *d_BGR_Out_byte,
+					unsigned int *d_BGR_In_byte_resized = NULL );
 
 protected:
 	void initialize();
@@ -86,6 +86,7 @@ private:
 
 	byte *d_R_In_byte,*d_G_In_byte,*d_B_In_byte;
 	byte *d_R_Out_byte,*d_G_Out_byte,*d_B_Out_byte;
+	byte *d_R_In_byte_resized,*d_G_In_byte_resized,*d_B_In_byte_resized;
 
 };
 
