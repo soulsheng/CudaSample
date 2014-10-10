@@ -756,6 +756,7 @@ DarkChannelGPU::~DarkChannelGPU()
 
 void DarkChannelGPU::initialize()
 {
+	nBufferSizeByteOriginal = width_original * height_original * sizeof(byte);
 	win_size = 7;//´°¿Ú´óÐ¡
 	r=20;
 	eps=0.001;
@@ -831,13 +832,13 @@ void DarkChannelGPU::initialize()
 	cudaMalloc((void**)&C_alpha,nBufferSizeFloat);  
 	cudaMalloc((void**)&C_alpha_original, nBufferSizeFloatOriginal );
 
-	cudaMalloc((void**)&d_R_In_byte, nBufferSizeByte );
-	cudaMalloc((void**)&d_G_In_byte, nBufferSizeByte );
-	cudaMalloc((void**)&d_B_In_byte, nBufferSizeByte );
+	cudaMalloc((void**)&d_R_In_byte, nBufferSizeByteOriginal );
+	cudaMalloc((void**)&d_G_In_byte, nBufferSizeByteOriginal );
+	cudaMalloc((void**)&d_B_In_byte, nBufferSizeByteOriginal );
 
-	cudaMalloc((void**)&d_R_Out_byte, nBufferSizeByte );
-	cudaMalloc((void**)&d_G_Out_byte, nBufferSizeByte );
-	cudaMalloc((void**)&d_B_Out_byte, nBufferSizeByte );
+	cudaMalloc((void**)&d_R_Out_byte, nBufferSizeByteOriginal );
+	cudaMalloc((void**)&d_G_Out_byte, nBufferSizeByteOriginal );
+	cudaMalloc((void**)&d_B_Out_byte, nBufferSizeByteOriginal );
 
 	cudaMalloc((void**)&d_R_In_byte_resized, nBufferSizeByte );
 	cudaMalloc((void**)&d_G_In_byte_resized, nBufferSizeByte );

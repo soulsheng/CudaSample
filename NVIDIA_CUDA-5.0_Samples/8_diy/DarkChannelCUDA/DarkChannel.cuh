@@ -50,6 +50,7 @@ private:
 	int width, height;
 	int width_original, height_original;
 	int nBufferSizeByte;
+	int nBufferSizeByteOriginal;
 	
 private:
 	int nBufferSizeFloat, nBufferSizeFloatOriginal;
