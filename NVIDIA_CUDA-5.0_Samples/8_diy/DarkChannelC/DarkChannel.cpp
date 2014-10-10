@@ -858,7 +858,7 @@ void DarkChannel(byte* B_In, byte* G_In, byte* R_In,
     {
         for(j=0;j<width;j++)
         {
-            cha[i*width+j] = abs(inten[i*width+j] - atmo);
+            cha[i*width+j] = fabs(inten[i*width+j] - atmo);
         }
     }
     float *alpha = (float*)calloc(height*width,sizeof(float));    		
