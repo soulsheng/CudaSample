@@ -487,3 +487,9 @@
 /NVIDIA_CUDA-5.0_Samples/8_diy/driverMinCUDA/*.sdf
 /NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannelCUDA/*.opensdf
 /NVIDIA_CUDA-5.0_Samples/8_diy/driverMinCUDA/*.suo
+/NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannelCUDA/Debug
+/NVIDIA_CUDA-5.0_Samples/8_diy/driverMinCUDA/*.in
+/NVIDIA_CUDA-5.0_Samples/8_diy/driverMinCUDA/*.out
+/NVIDIA_CUDA-5.0_Samples/8_diy/driverMinCUDA/*.pdb
+/NVIDIA_CUDA-5.0_Samples/8_diy/*.bmp
+/NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannelC/*.bmp
