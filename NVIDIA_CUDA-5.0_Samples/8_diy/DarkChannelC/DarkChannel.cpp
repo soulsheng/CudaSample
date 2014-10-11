@@ -23,10 +23,10 @@ using namespace std;
 #include <thrust/sort.h>
 
 #define		ENABLE_RESIZE		0
-#define		ENABLE_TIMER		0
+#define		ENABLE_TIMER		1
 
 #if ENABLE_TIMER
-#include <helper_timer.h>
+#include "helper_timer.h"
 #endif
 
 /*************************************************

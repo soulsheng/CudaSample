@@ -20,5 +20,8 @@
       <Filter>utility</Filter>
     </ClInclude>
     <ClInclude Include="DarkChannel.h" />
+    <ClInclude Include="helper_timer.h">
+      <Filter>utility</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

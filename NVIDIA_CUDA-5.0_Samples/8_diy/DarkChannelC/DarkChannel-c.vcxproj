@@ -19,6 +19,7 @@
     <ClInclude Include="DarkChannel.h" />
     <ClInclude Include="bmpHandler.h" />
     <ClInclude Include="commonDefinition.h" />
+    <ClInclude Include="helper_timer.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{48559C97-1A54-45B0-930D-6B679A647815}</ProjectGuid>
