@@ -765,7 +765,7 @@ void DarkChannel(byte* B_In, byte* G_In, byte* R_In,
     
     int range = ceil(width * height * 0.001);
     float *radi_pro = (float*)calloc(range,sizeof(float)); //申请二维数组动态储存空间 
-    //float **init2Array(float **w, int height, int width, int initValue)    
+#if 0   //float **init2Array(float **w, int height, int width, int initValue)    
     float *a = (float*)calloc(width,sizeof(float)); //申请二维数组动态储存空间 height*width    
     float *b = (float*)calloc(width,sizeof(float)); //申请二维数组动态储存空间 height*width;
     
@@ -814,6 +814,20 @@ void DarkChannel(byte* B_In, byte* G_In, byte* R_In,
         
         radi_pro[s] = R_P[bb*width+d]+G_P[bb*width+d]+B_P[bb*width+d];
     }
+#else
+	unsigned int *pValue = new unsigned int[height*width];
+	thrust::sequence( pValue, pValue + height*width );
+
+	thrust::sort_by_key( win_dark, win_dark + height*width, pValue,
+		thrust::greater<float>() ); // 从大到小
+
+	for(int i=0;i<range;i++)
+	{
+		int id = pValue[i];
+		radi_pro[i] = R_P[id]+G_P[id]+B_P[id];
+	}
+
+#endif
     
 #if ENABLE_TIMER
 	sdkStopTimer(&timer);
@@ -827,7 +841,7 @@ void DarkChannel(byte* B_In, byte* G_In, byte* R_In,
     float atmo = 0.0;//Atmospheric optical
     float radi_pro_val = radi_pro[0];
 
-	radi_pro_val = *thrust::max_element( radi_pro, radi_pro+s );
+	radi_pro_val = *thrust::max_element( radi_pro, radi_pro+range );
 
     atmo = radi_pro_val / 3 ;   
     float *inten = (float*)calloc(height*width,sizeof(float)); //申请二维数组动态储存空间 height*width
