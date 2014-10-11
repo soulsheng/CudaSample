@@ -19,6 +19,9 @@
 
 using namespace std;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
 
+#include <thrust/host_vector.h>
+#include <thrust/sort.h>
+
 #define		ENABLE_RESIZE		0
 #define		ENABLE_TIMER		0
 
@@ -823,11 +826,9 @@ void DarkChannel(byte* B_In, byte* G_In, byte* R_In,
 
     float atmo = 0.0;//Atmospheric optical
     float radi_pro_val = radi_pro[0];
-    
-    for(i=0;i<s;i++)
-    {
-        if(radi_pro[i]>radi_pro_val) radi_pro_val = radi_pro[i];
-    }
+
+	radi_pro_val = *thrust::max_element( radi_pro, radi_pro+s );
+
     atmo = radi_pro_val / 3 ;   
     float *inten = (float*)calloc(height*width,sizeof(float)); //申请二维数组动态储存空间 height*width
 		 
