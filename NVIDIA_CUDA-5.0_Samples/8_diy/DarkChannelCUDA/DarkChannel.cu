@@ -643,13 +643,13 @@ void DarkChannelGPU::Enhance(	byte *d_B_In_byte,	byte *d_G_In_byte,	byte *d_R_In
 	radi<<<block1,256>>>(C_radi_pro,C_ID,d_R_In,d_G_In,d_B_In,range);
  
 
-	thrust::sort(	thrust::device_ptr<float>(C_radi_pro), 
+	thrust::device_ptr<float> radi_pro_d = thrust::max_element(	thrust::device_ptr<float>(C_radi_pro), 
 					thrust::device_ptr<float>(C_radi_pro + range), 
-					thrust::greater<float>() ); // 从大到小
+					thrust::greater<float>() );
 	float radi_pro;
 
 
-	cudaMemcpy(&radi_pro,C_radi_pro,1*sizeof(float),cudaMemcpyDeviceToHost);
+	cudaMemcpy(&radi_pro,thrust::raw_pointer_cast(radi_pro_d),1*sizeof(float),cudaMemcpyDeviceToHost);
   
 
 	float atmo;
