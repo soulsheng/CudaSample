@@ -493,3 +493,9 @@
 /NVIDIA_CUDA-5.0_Samples/8_diy/driverMinCUDA/*.pdb
 /NVIDIA_CUDA-5.0_Samples/8_diy/*.bmp
 /NVIDIA_CUDA-5.0_Samples/8_diy/DarkChannelC/*.bmp
+/NVIDIA_CUDA-5.0_Samples/0_Simple/clock/Win32
+/NVIDIA_CUDA-5.0_Samples/0_Simple/clock/ipch
+/NVIDIA_CUDA-5.0_Samples/0_Simple/clock/clock_vs2010.sdf
+/NVIDIA_CUDA-5.0_Samples/0_Simple/clock/*.suo
+/NVIDIA_CUDA-5.0_Samples/7_CUDALibraries/freeImageInteropNPP/Win32
+/NVIDIA_CUDA-5.0_Samples/0_Simple/simpleSeparateCompilation/Win32
