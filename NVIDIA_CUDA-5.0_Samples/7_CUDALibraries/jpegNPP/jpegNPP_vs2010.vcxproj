@@ -151,7 +151,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(CUDA_PATH)\include;$(CudaToolkitIncludeDir);..\common\UtilNPP;..\common\FreeImage\include;..\..\common\inc;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(CUDA_PATH_V6_0)\include;$(CudaToolkitIncludeDir);..\common\UtilNPP;..\common\FreeImage\include;..\..\common\inc;</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_MBCS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -160,7 +160,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Console</SubSystem>
       <AdditionalDependencies>cudart_static.lib;nppi.lib;nppc.lib;freeimage.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(CUDA_PATH)/lib/$(PlatformName);$(CudaToolkitLibDir);../common/FreeImage/lib;../../common/lib/$(PlatformName);</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(CUDA_PATH_V6_0)/lib/$(PlatformName);$(CudaToolkitLibDir);../common/FreeImage/lib;../../common/lib/$(PlatformName);</AdditionalLibraryDirectories>
       <OutputFile>$(OutDir)/$(TargetName)$(TargetExt)</OutputFile>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <IgnoreSpecificDefaultLibraries>libcmt</IgnoreSpecificDefaultLibraries>
