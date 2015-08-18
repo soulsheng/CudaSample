@@ -49,6 +49,9 @@
 
 using namespace std;
 
+//#define INPUT_IMAGE_FILE_NAME	"Growth_of_cubic_bacteria_1080p-O.jpg"
+#define INPUT_IMAGE_FILE_NAME	"Growth_of_cubic_bacteria_1080p.jpg"
+
 struct FrameHeader
 {
     unsigned char nSamplePrecision;
@@ -364,7 +367,7 @@ int main(int argc, char **argv)
     }
     else
     {
-        szInputFile = sdkFindFilePath("Growth_of_cubic_bacteria_25x16.jpg", argv[0]);
+        szInputFile = sdkFindFilePath(INPUT_IMAGE_FILE_NAME, argv[0]);
     }
     cout << "Source File: " << szInputFile << endl;
 
