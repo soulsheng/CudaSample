@@ -20,7 +20,7 @@ using namespace std;
 
 #define USE_GPU	1
 #define	IMAGE_FILE_TEST		"DarkChannel.bmp"
-#define	ENABLE_RESIZE		1
+#define	ENABLE_RESIZE		0
 #define	ENABLE_TIMER	1
 
 int main()
@@ -81,6 +81,7 @@ int main()
 	DarkChannel( RGBA_In, RGBA_Out, width, height );
 #endif
 
+	cudaDeviceSynchronize();
 #if ENABLE_TIMER
 	sdkStopTimer(&timer);
 	printf("Processing time ALL: %f (ms)\n", sdkGetTimerValue(&timer));
