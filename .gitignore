@@ -499,3 +499,17 @@
 /NVIDIA_CUDA-5.0_Samples/0_Simple/clock/*.suo
 /NVIDIA_CUDA-5.0_Samples/7_CUDALibraries/freeImageInteropNPP/Win32
 /NVIDIA_CUDA-5.0_Samples/0_Simple/simpleSeparateCompilation/Win32
+/NVIDIA_CUDA-5.0_Samples/2_Graphics/bindlessTexture/Win32
+/NVIDIA_CUDA-5.0_Samples/6_Advanced/ptxjit/Win32
+/NVIDIA_CUDA-5.0_Samples/6_Advanced/shfl_scan/Win32
+/NVIDIA_CUDA-5.0_Samples/7_CUDALibraries/jpegNPP/Win32
+/NVIDIA_CUDA-5.0_Samples/7_CUDALibraries/simpleCUFFT/obj/Win32
+/NVIDIA_CUDA-5.0_Samples/7_CUDALibraries/freeImageInteropNPP/*.sdf
+/NVIDIA_CUDA-5.0_Samples/7_CUDALibraries/jpegNPP/*.sdf
+/NVIDIA_CUDA-5.0_Samples/7_CUDALibraries/jpegNPP/ipch
+/NVIDIA_CUDA-5.0_Samples/7_CUDALibraries/freeImageInteropNPP/*.suo
+/NVIDIA_CUDA-5.0_Samples/7_CUDALibraries/jpegNPP/*.suo
+/NVIDIA_CUDA-5.0_Samples/bin/win32/Debug/*.lib
+/NVIDIA_CUDA-5.0_Samples/bin/win32/Release/*.lib
+/NVIDIA_CUDA-5.0_Samples/bin/win32/Debug/*.exp
+/NVIDIA_CUDA-5.0_Samples/bin/win32/Release/*.exp
