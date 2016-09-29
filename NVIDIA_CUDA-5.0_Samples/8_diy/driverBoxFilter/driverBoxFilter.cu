@@ -46,11 +46,14 @@ public:
 	void run();
 	void readFile(float **ppBuffer, std::string filename, int& width, int& height);
 	void writeFile(float *buffer, std::string filename, int width, int height=1);
+	void readSize(int **ppBuffer, std::string filename, int n);
+	void writeSize(int *buffer, std::string filename, int n);
 	bool verifyResult(float *p, float *p_ref, int n);
 
 private:
 	float *imCum_C, *C_ones, *N;
 	float *pN, *pN_ref;
+	int *pSize;
 	int nBufferSizeFloat;
 	int height, width, r;
 
@@ -89,6 +92,36 @@ void driverBoxFilter::writeFile(float *buffer, std::string filename, int width, 
 	fwrite( buffer, width*height*sizeof(float), 1, fp);
 	fclose(fp);
 }
+
+void driverBoxFilter::readSize(int **ppBuffer, std::string filename, int n)
+{
+	FILE* fp=fopen( filename.c_str(),"rb");
+	if(fp == NULL)
+	{
+		printf("Cann't open the file!\n");
+		exit(0);
+	}
+	fread( &n, sizeof(int), 1, fp);
+	*ppBuffer = (int*)malloc( n * sizeof(int) );
+
+	fread( *ppBuffer, n * sizeof(int), 1, fp);
+
+	fclose(fp);
+}
+
+void driverBoxFilter::writeSize(int *buffer, std::string filename, int n)
+{
+	FILE* fp=fopen( filename.c_str(),"wb");
+	if(fp == NULL)
+	{
+		printf("Cann't open the file!\n");
+		exit(0);
+	}
+	fwrite( &n, sizeof(int), 1, fp);
+	fwrite( buffer, n*sizeof(int), n, fp);
+	fclose(fp);
+}
+
 bool driverBoxFilter::verifyResult(float *p, float *p_ref, int n)
 {
 	for (int i=0; i<n; i++ ) 
@@ -103,6 +136,8 @@ bool driverBoxFilter::verifyResult(float *p, float *p_ref, int n)
 void driverBoxFilter::initialize( )
 {
 	//read Parameter
+	readSize( &pSize, "size.out", 1);
+	r = pSize[0];
 	readFile( &pN_ref, "N.out", width, height );
 
 
@@ -128,7 +163,12 @@ void driverBoxFilter::run()
 
 	cudaMemcpy( pN, N, nBufferSizeFloat, cudaMemcpyDeviceToHost );
 
-	verifyResult( pN, pN_ref, width*height );
+	bool bSuccess = verifyResult( pN, pN_ref, width*height );
+
+	if( bSuccess )
+		printf("right result \n");
+	else
+		printf("wrong result \n");
 }
 
 int main(int argc, char* argv[])
