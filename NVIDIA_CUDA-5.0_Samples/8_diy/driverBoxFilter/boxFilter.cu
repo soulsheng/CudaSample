@@ -4,7 +4,7 @@
 
 #define		BLOCK_SIZE_1D	64	// BLOCK_SIZE = BLOCK_SIZE_1D
 #define		USE_TEXTURE		0
-#define		USE_SDK			0
+#define		USE_SDK			1
 
 // for gtx480	(USE_TEXTURE,USE_SDK) = (0,0)
 // for tk1		(USE_TEXTURE,USE_SDK) = (1,1)
@@ -226,6 +226,7 @@ __global__ void
 d_boxfilter_x_global(float *id, float *od, int w, int h, int r)
 {
     unsigned int y = blockIdx.x*blockDim.x + threadIdx.x;
+	if(y>=h) return;
     d_boxfilter_x(&id[y * w], &od[y * w], w, h, r);
 }
 
@@ -233,6 +234,7 @@ __global__ void
 d_boxfilter_y_global(float *id, float *od, int w, int h, int r)
 {
     unsigned int x = blockIdx.x*blockDim.x + threadIdx.x;
+	if(x>=w) return;
     d_boxfilter_y(&id[x], &od[x], w, h, r);
 }
 
@@ -298,7 +300,7 @@ void boxfilter(float *imSrc,float *imCum_C,float *imDst,int r,int height,int wid
 	d_boxfilter_x_tex<<< (height+BLOCK_SIZE_1D-1) / BLOCK_SIZE_1D, BLOCK_SIZE_1D, 0 >>>(imCum_C, width, height, r);
 #else
 
-	d_boxfilter_x_global<<< height / BLOCK_SIZE_1D, BLOCK_SIZE_1D, 0 >>>(imSrc, imCum_C, width, height, r);
+	d_boxfilter_x_global<<< (height+BLOCK_SIZE_1D-1) / BLOCK_SIZE_1D, BLOCK_SIZE_1D, 0 >>>(imSrc, imCum_C, width, height, r);
 
 #endif
 	d_boxfilter_y_global<<< (width+BLOCK_SIZE_1D-1) / BLOCK_SIZE_1D, BLOCK_SIZE_1D, 0 >>>(imCum_C, imDst, width, height, r);
