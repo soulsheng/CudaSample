@@ -149,6 +149,8 @@ void driverBoxFilter::initialize( )
 
 	thrust::fill( thrust::device_ptr<float>(C_ones), thrust::device_ptr<float>(C_ones + width*height), 1.0f);
 
+	initTexture(width, height);
+
 }
 
 void driverBoxFilter::release( )

@@ -3,7 +3,7 @@
 #include <cuda_runtime.h>
 
 #define		BLOCK_SIZE_1D	64	// BLOCK_SIZE = BLOCK_SIZE_1D
-#define		USE_TEXTURE		0
+#define		USE_TEXTURE		1
 #define		USE_SDK			1
 
 // for gtx480	(USE_TEXTURE,USE_SDK) = (0,0)
