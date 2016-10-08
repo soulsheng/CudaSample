@@ -521,3 +521,10 @@
 /NVIDIA_CUDA-5.0_Samples/8_diy/driverBoxFilter/*.pdb
 /NVIDIA_CUDA-5.0_Samples/8_diy/driverBoxFilter/*.out
 /NVIDIA_CUDA-5.0_Samples/8_diy/driverBoxFilter/Release
+/NVIDIA_CUDA-5.0_Samples/0_Simple/simpleZeroCopy/Win32
+/NVIDIA_CUDA-5.0_Samples/0_Simple/simpleZeroCopy/ipch
+/NVIDIA_CUDA-5.0_Samples/0_Simple/simpleZeroCopy/*.opensdf
+/NVIDIA_CUDA-5.0_Samples/0_Simple/simpleZeroCopy/*.sdf
+/NVIDIA_CUDA-5.0_Samples/0_Simple/simpleZeroCopy/*.suo
+/NVIDIA_CUDA-5.0_Samples/0_Simple/simpleZeroCopy/x64
+/NVIDIA_CUDA-5.0_Samples/bin
