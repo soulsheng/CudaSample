@@ -19,12 +19,7 @@ using namespace std;
 // 对于gtx480	BLOCK_SIZE_2D = (4,128)(3.7ms pointer), (8,32)(5.2ms texture)
 // 对于gt640	BLOCK_SIZE_2D = (4,32)(40ms pointer), (4,128)(14.7ms texture)
 
-#define		USE_TEXTURE_ADDRESS	1
-#define		ENABLE_TIMER	1
-
-#if	ENABLE_TIMER
-#include <helper_timer.h>
-#endif
+#include "helper_timer.h"
 
 int getMaxThreadsPerBlock()
 {
@@ -57,6 +52,7 @@ private:
 	int nBufferSizeFloat;
 	int height, width, r;
 
+	StopWatchInterface *timer;
 	void release();
 };
 
@@ -151,6 +147,8 @@ void driverBoxFilter::initialize( )
 
 	initTexture(width, height);
 
+	sdkCreateTimer(&timer);
+	sdkStartTimer(&timer);
 }
 
 void driverBoxFilter::release( )
@@ -161,7 +159,11 @@ void driverBoxFilter::release( )
 
 void driverBoxFilter::run()
 {
+	TIME_TEST("init")
+
 	boxfilter(C_ones,imCum_C,N,r,height,width);
+	
+	TIME_TEST("box filter")
 
 	cudaMemcpy( pN, N, nBufferSizeFloat, cudaMemcpyDeviceToHost );
 

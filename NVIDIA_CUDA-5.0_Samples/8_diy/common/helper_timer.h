@@ -17,6 +17,17 @@
 #define EXIT_WAIVED 2
 #endif
 
+
+#define TIME_TEST_CPU(item) \
+	sdkStopTimer(&timer); \
+	cout << "time of " << item << " is: " << sdkGetTimerValue(&timer) << " ms." << endl; \
+	sdkResetTimer(&timer); \
+	sdkStartTimer(&timer);
+
+#define TIME_TEST(item) \
+	cudaDeviceSynchronize(); \
+	TIME_TEST_CPU(item)
+
 // includes, system
 #include <vector>
 
